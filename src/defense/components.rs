@@ -4,5 +4,4 @@ use bevy::prelude::*;
 #[reflect(Component)]
 pub struct Defense {
     pub shooting_timer: Timer,
-    pub range: f32,
 }

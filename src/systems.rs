@@ -37,6 +37,7 @@ pub fn setup_physics(
             ..default()
         },
         Collider::cuboid(7.5, 0.05, 7.5),
+        CollisionGroups::new(Group::GROUP_1, Group::GROUP_1),
     ));
 
     // Create the bouncing ball.
@@ -57,5 +58,6 @@ pub fn setup_physics(
         Collider::ball(0.5),
         Restitution::coefficient(0.7),
         PickableBundle::default(),
+        CollisionGroups::new(Group::GROUP_2, Group::GROUP_2)
     ));
 }

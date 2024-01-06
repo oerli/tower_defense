@@ -15,6 +15,7 @@ use systems::*;
 use player::PlayerPlugin;
 use enemy::EnemyPlugin;
 use defense::DefensePlugin;
+use bullet::BulletPlugin;
 
 fn main() {
     App::new()
@@ -26,6 +27,7 @@ fn main() {
         .add_plugins(PlayerPlugin)
         .add_plugins(EnemyPlugin)
         .add_plugins(DefensePlugin)
+        .add_plugins(BulletPlugin)
         .add_systems(Startup, setup_graphics)
         .add_systems(Startup, setup_physics)
         .run();

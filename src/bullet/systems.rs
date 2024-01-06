@@ -1,16 +1,21 @@
 use bevy::prelude::*;
+use bevy_rapier3d::dynamics::Velocity;
 
 use super::components::*;
 
-pub fn bullet_movement (
+pub fn bullet_movement(
     mut commands: Commands,
-    time: Res<Time>,
-    mut query: Query<(Entity, &mut Transform, &Bullet)>,
+    mut query: Query<(Entity, &mut GlobalTransform, &mut Velocity, &Bullet)>,
 ) {
-    for (entity, mut transform, bullet) in query.iter_mut() {
-        transform.translation += bullet.direction * bullet.speed * time.delta_seconds();
-        if transform.translation.x < -400.0 || transform.translation.x > 400.0 || transform.translation.y < -300.0 || transform.translation.y > 300.0 {
-            commands.entity(entity).despawn();
+    for (entity, position, mut velocity, bullet) in query.iter_mut() {
+        let mut direction = bullet.target - position.translation();
+
+        let distance = direction.length();
+        if distance < 0.5 {
+            commands.entity(entity).despawn_recursive();
+        } else {
+            direction = direction.normalize();
+            velocity.linvel += direction * bullet.speed;
         }
     }
 }
