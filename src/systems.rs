@@ -31,12 +31,12 @@ pub fn setup_physics(
     // Create the ground.
     commands.spawn((
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(10.0, 0.1, 10.0))),
+            mesh: meshes.add(Mesh::from(shape::Box::new(15.0, 0.1, 15.0))),
             material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
             transform: Transform::from_xyz(0.0, -2.0, 0.0),
             ..default()
         },
-        Collider::cuboid(5.0, 0.05, 5.0),
+        Collider::cuboid(7.5, 0.05, 7.5),
     ));
 
     // Create the bouncing ball.

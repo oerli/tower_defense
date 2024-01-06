@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
+mod components;
 mod systems;
+
 use systems::*;
 
 pub struct DefensePlugin;

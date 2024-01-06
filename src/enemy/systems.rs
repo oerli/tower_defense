@@ -1,7 +1,10 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
-use super::resources::EnemyPath;
 use crate::components::Health;
+
+use super::components::*;
+use super::resources::*;
 
 pub fn setup_enemies(
     mut commands: Commands,
@@ -15,27 +18,32 @@ pub fn setup_enemies(
             transform: Transform::from_xyz(-5.0, 0.0, -5.0),
             ..Default::default()
         },
+        RigidBody::Dynamic,
+        Collider::cuboid(0.5, 0.5, 0.5),
+        Velocity {
+            linvel: Vec3::new(0.0, 0.0, 0.0),
+            angvel: Vec3::new(0.0, 0.0, 0.0),
+        },
         Health { value: 10 },
+        Enemy { speed: 0.1 },
     ));
 }
 
 pub fn enemy_movement(
     mut commands: Commands,
-    mut query: Query<(Entity, &mut Transform, &Health)>,
+    mut query: Query<(Entity, &Enemy, &mut Velocity, &GlobalTransform)>,
     mut path: ResMut<EnemyPath>,
 ) {
-    for (entity, mut transform, health) in query.iter_mut() {
-        if path.waypoints.len() > 0 && health.value > 0 {
-            let mut position = transform.translation;
-            let mut direction = path.waypoints[0] - position;
+    for (entity, enemy, mut velocity, position) in query.iter_mut() {
+        if path.waypoints.len() > 0 {
+            let mut direction = path.waypoints[0] - position.translation();
             direction.y = 0.0;
             let distance = direction.length();
-            if distance < 0.1 {
+            if distance < 0.5 {
                 path.waypoints.remove(0);
             } else {
                 direction = direction.normalize();
-                position += direction * 0.05;
-                transform.translation = position;
+                velocity.linvel += direction * enemy.speed;
             }
         } else {
             commands.entity(entity).despawn();
