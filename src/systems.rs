@@ -40,24 +40,4 @@ pub fn setup_physics(
         CollisionGroups::new(Group::GROUP_1, Group::GROUP_1),
     ));
 
-    // Create the bouncing ball.
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(
-                Mesh::try_from(shape::Icosphere {
-                    radius: 0.5,
-                    subdivisions: 10,
-                })
-                .unwrap(),
-            ),
-            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(0.0, 4.0, 0.0),
-            ..default()
-        },
-        RigidBody::Dynamic,
-        Collider::ball(0.5),
-        Restitution::coefficient(0.7),
-        PickableBundle::default(),
-        CollisionGroups::new(Group::GROUP_2, Group::GROUP_2)
-    ));
 }

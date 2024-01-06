@@ -3,18 +3,7 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{bullet::components::Bullet, enemy::components::Enemy};
 
-// pub fn modify_collider_active_events(mut active_events: Query<&mut ActiveEvents>, collision_groups: Query<&CollisionGroups>) {
-//     for mut active_events in active_events.iter_mut() {
-//         // // *active_events = ActiveEvents::COLLISION_EVENTS;
-//         // if collision_groups.get(active_events.).unwrap().membership == 1 {
-//         //     *active_events = ActiveEvents::CONTACT_EVENTS;
-//         // }
-
-//     }
-// }
-
-/* A system that displays the events. */
-pub fn display_events(
+pub fn enemy_contact(
     mut collision_events: EventReader<CollisionEvent>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -23,7 +12,7 @@ pub fn display_events(
 ) {
     for collision_event in collision_events.read() {
         match collision_event {
-            CollisionEvent::Started(entity1, entity2, flags) => {
+            CollisionEvent::Started(entity1, entity2, _flags) => {
                 println!(
                     "Collision started between bodies with handles {:?} and {:?}",
                     entity1, entity2
@@ -44,19 +33,19 @@ pub fn display_events(
                             angvel: Vec3::new(0.0, 0.0, 0.0),
                         },
                         Bullet::new(enemy_transform.translation(), 1.0),
+                        CollisionGroups::new(Group::GROUP_2, Group::GROUP_2),
                         // Lifetime {
                         //     timer: Timer::from_seconds(10.0, TimerMode::Once),
                         // },
                     ));
                 });
             }
-            CollisionEvent::Stopped(entity1, entity2, flags) => {
+            CollisionEvent::Stopped(entity1, entity2, _flags) => {
                 println!(
                     "Collision stopped between bodies with handles {:?} and {:?}",
                     entity1, entity2
                 );
             }
         }
-        // println!("Received collision event: {:?}", collision_event);
     }
 }

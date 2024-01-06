@@ -15,8 +15,7 @@ impl Plugin for DefensePlugin {
         app
             // Systems
             .add_systems(Startup, setup_defense)
-            // .add_systems(Update, modify_collider_active_events)
-            .add_systems(Update, display_events.run_if(on_event::<CollisionEvent>()))
+            .add_systems(Update, enemy_contact.run_if(on_event::<CollisionEvent>()))
             .add_systems(Update, defense_shooting.run_if(on_event::<CollisionEvent>()));
     }
 }

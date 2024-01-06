@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::components::Health;
-
 use super::components::*;
 use super::resources::*;
 
@@ -24,9 +22,8 @@ pub fn setup_enemies(
             linvel: Vec3::new(0.0, 0.0, 0.0),
             angvel: Vec3::new(0.0, 0.0, 0.0),
         },
-        CollisionGroups::new(Group::GROUP_1, Group::GROUP_1),
-        Health { value: 10 },
-        Enemy { speed: 0.1 },
+        CollisionGroups::new(Group::GROUP_1, Group::GROUP_1 | Group::GROUP_2),
+        Enemy { speed: 0.1, health: 1 },
     ));
 }
 

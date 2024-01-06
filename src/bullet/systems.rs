@@ -11,11 +11,11 @@ pub fn bullet_movement(
         let mut direction = bullet.target - position.translation();
 
         let distance = direction.length();
-        if distance < 0.5 {
-            commands.entity(entity).despawn_recursive();
-        } else {
+        // if distance < 0.5 {
+        //     commands.entity(entity).despawn_recursive();
+        // } else {
             direction = direction.normalize();
             velocity.linvel += direction * bullet.speed;
-        }
+        // }
     }
 }

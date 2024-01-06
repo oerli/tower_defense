@@ -4,4 +4,5 @@ use bevy::prelude::*;
 #[reflect(Component)]
 pub struct Enemy {
     pub speed: f32,
+    pub health: i32,
 }

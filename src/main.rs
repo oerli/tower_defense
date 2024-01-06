@@ -4,7 +4,6 @@ use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use bevy_rapier3d::prelude::*;
 
 mod systems;
-mod components;
 mod enemy;
 mod player;
 mod defense;
