@@ -33,11 +33,11 @@ pub fn setup_physics(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(15.0, 0.1, 15.0))),
             material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
-            transform: Transform::from_xyz(0.0, -2.0, 0.0),
+            transform: Transform::from_xyz(0.0, -0.6, 0.0),
             ..default()
         },
         Collider::cuboid(7.5, 0.05, 7.5),
-        CollisionGroups::new(Group::GROUP_1, Group::GROUP_1),
+        CollisionGroups::new(Group::GROUP_4, Group::all()),
     ));
 
 }

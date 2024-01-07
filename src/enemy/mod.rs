@@ -16,6 +16,7 @@ impl Plugin for EnemyPlugin {
             .init_resource::<EnemyPath>()
             // Systems
             .add_systems(Startup, setup_enemies)
+            .add_systems(Update, enemy_destroyed)
             .add_systems(Update, enemy_movement);
     }
 }

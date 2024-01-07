@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_rapier3d::dynamics::Velocity;
+use bevy_rapier3d::prelude::*;
 
 use super::components::*;
 

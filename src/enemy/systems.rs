@@ -22,8 +22,8 @@ pub fn setup_enemies(
             linvel: Vec3::new(0.0, 0.0, 0.0),
             angvel: Vec3::new(0.0, 0.0, 0.0),
         },
-        CollisionGroups::new(Group::GROUP_1, Group::GROUP_1 | Group::GROUP_2),
-        Enemy { speed: 0.1, health: 1 },
+        CollisionGroups::new(Group::GROUP_3, Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4),
+        Enemy { speed: 0.1, health: 4 },
     ));
 }
 
@@ -44,6 +44,17 @@ pub fn enemy_movement(
                 velocity.linvel += direction * enemy.speed;
             }
         } else {
+            commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn enemy_destroyed(
+    mut commands: Commands,
+    mut query: Query<(Entity, &Enemy)>,
+) {
+    for (entity, enemy) in query.iter_mut() {
+        if enemy.health <= 0 {
             commands.entity(entity).despawn();
         }
     }

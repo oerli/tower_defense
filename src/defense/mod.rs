@@ -16,6 +16,6 @@ impl Plugin for DefensePlugin {
             // Systems
             .add_systems(Startup, setup_defense)
             .add_systems(Update, enemy_contact.run_if(on_event::<CollisionEvent>()))
-            .add_systems(Update, defense_shooting.run_if(on_event::<CollisionEvent>()));
+            .add_systems(Update, defense_shooting);
     }
 }
