@@ -23,7 +23,7 @@ pub fn enemy_contact(
 
                 enemy_query.get(*entity2).ok().map(|enemy_transform| {
                     let mut defense = defense_query.get_single_mut().unwrap();
-                    defense.target = Some(*entity2);
+                    defense.targets.push(*entity2);
                     
 
                     // commands.spawn((
@@ -50,10 +50,14 @@ pub fn enemy_contact(
                 });
             }
             CollisionEvent::Stopped(entity1, entity2, _flags) => {
+                enemy_query.get(*entity2).ok().map(|enemy_transform| {
+                    let mut defense = defense_query.get_single_mut().unwrap();
+                    defense.targets.retain(|&x| x != *entity2);
                 // println!(
                 //     "Collision stopped between bodies with handles {:?} and {:?}",
                 //     entity1, entity2
                 // );
+                });
             }
         }
     }

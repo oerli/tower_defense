@@ -13,7 +13,7 @@ pub fn setup_enemies(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
             material: materials.add(Color::rgb(0.5, 0.4, 0.3).into()),
-            transform: Transform::from_xyz(-5.0, 0.0, -5.0),
+            transform: Transform::from_xyz(-3.0, 0.0, -3.0),
             ..Default::default()
         },
         RigidBody::Dynamic,
@@ -22,8 +22,9 @@ pub fn setup_enemies(
             linvel: Vec3::new(0.0, 0.0, 0.0),
             angvel: Vec3::new(0.0, 0.0, 0.0),
         },
+        ActiveEvents::COLLISION_EVENTS,
         CollisionGroups::new(Group::GROUP_3, Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4),
-        Enemy { speed: 0.1, health: 4 },
+        Enemy { speed: 0.1, health: 10 },
     ));
 }
 

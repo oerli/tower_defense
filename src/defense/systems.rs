@@ -1,10 +1,10 @@
-use bevy::{prelude::*, utils::FloatOrd};
+use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use super::components::*;
 
 use crate::{
-    bullet::{self, components::*},
+    bullet::components::*,
     enemy::components::*,
 };
 
@@ -18,22 +18,46 @@ pub fn setup_defense(
             PbrBundle {
                 mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
                 material: materials.add(Color::rgb(0.3, 0.4, 0.5).into()),
-                transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                transform: Transform::from_xyz(-2.0, 1.0, -3.0),
                 ..Default::default()
             },
-            // RigidBody::Dynamic,
-            Collider::cuboid(0.5, 0.5, 0.5),
+            RigidBody::Dynamic,
             Defense {
-                target: None,
+                targets: vec![],
                 shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
             },
+            Collider::ball(3.0),
+                Sensor,
+                CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
         ))
         .with_children(|parent| {
             parent.spawn((
-                Collider::ball(3.0),
+                Collider::cuboid(0.5, 0.5, 0.5),
+                CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
+            ));
+        });
+
+        commands
+        .spawn((
+            PbrBundle {
+                mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
+                material: materials.add(Color::rgb(0.3, 0.4, 0.5).into()),
+                transform: Transform::from_xyz(2.0, 1.0, 3.0),
+                ..Default::default()
+            },
+            RigidBody::Dynamic,
+            Defense {
+                targets: vec![],
+                shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+            },
+            Collider::ball(3.0),
                 Sensor,
-                ActiveEvents::COLLISION_EVENTS,
                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Collider::cuboid(0.5, 0.5, 0.5),
+                CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
             ));
         });
 }
@@ -50,16 +74,14 @@ pub fn defense_shooting(
         defense.shooting_timer.tick(time.delta());
 
         if defense.shooting_timer.finished() {
-            if let Some(target) = defense.target{
-            if let Ok(enemy) = enemy_query.get(target) {
-                if let Some(target) = defense.target {
-
+            if let Some(target) = defense.targets.get(0) {
+                if let Ok(enemy) = enemy_query.get(*target) {
                     commands.spawn((
                         PbrBundle {
                             mesh: meshes
                                 .add(Mesh::try_from(shape::Box::new(0.2, 0.2, 0.2)).unwrap()),
                             material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-                            transform: Transform::from_xyz(0.0, 1.0, 0.0),
+                            transform: Transform::from_translation(transform.translation() + Vec3::new(0.0, 1.0, 0.0)),
                             ..default()
                         },
                         RigidBody::Dynamic,
@@ -68,8 +90,7 @@ pub fn defense_shooting(
                             linvel: Vec3::new(0.0, 1.0, 0.0),
                             angvel: Vec3::new(0.0, 0.0, 0.0),
                         },
-                        Bullet::new(enemy.translation(), 1.0),
-                        ActiveEvents::COLLISION_EVENTS,
+                        Bullet::new(enemy.translation(), 1.0, 1),
                         CollisionGroups::new(Group::GROUP_1, Group::GROUP_3),
                         // Lifetime {
                         //     timer: Timer::from_seconds(10.0, TimerMode::Once),
@@ -77,7 +98,6 @@ pub fn defense_shooting(
                     ));
                 }
             }
-        }
         }
     }
 }
