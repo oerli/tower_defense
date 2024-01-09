@@ -3,13 +3,9 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{bullet::components::Bullet, defense::components::Defense, enemy::components::Enemy};
 
-use super::components::*;
-
 pub fn enemy_contact(
     mut collision_events: EventReader<CollisionEvent>,
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mut defense_query: Query<&mut Defense>,
     mut enemy_query: Query<&mut Enemy>,
     bullet_query: Query<&Bullet>,
@@ -22,19 +18,16 @@ pub fn enemy_contact(
                     entity1, entity2
                 );
 
-                bullet_query
-                    .get(*entity1)
-                    .ok()
-                    .map(|bullet| {
-                        info!("bullet hit enemy");
+                bullet_query.get(*entity1).ok().map(|bullet| {
+                    info!("bullet hit enemy");
 
-                        enemy_query.get_mut(*entity2).ok().map(|mut enemy| {
-                            enemy.health -= bullet.damage;
-                            info!("enemy health: {:?}", enemy.health);
-                        });
-
-                        commands.entity(*entity1).despawn_recursive();
+                    enemy_query.get_mut(*entity2).ok().map(|mut enemy| {
+                        enemy.health -= bullet.damage;
+                        info!("enemy health: {:?}", enemy.health);
                     });
+
+                    commands.entity(*entity1).despawn_recursive();
+                });
 
                 enemy_query.get_mut(*entity2).ok().map(|_enemy| {
                     info!("enemy went into range");
@@ -44,19 +37,16 @@ pub fn enemy_contact(
                     });
                 });
 
-                bullet_query
-                    .get(*entity2)
-                    .ok()
-                    .map(|bullet| {
-                        info!("bullet hit enemy");
+                bullet_query.get(*entity2).ok().map(|bullet| {
+                    info!("bullet hit enemy");
 
-                        enemy_query.get_mut(*entity1).ok().map(|mut enemy| {
-                            enemy.health -= bullet.damage;
-                            info!("enemy health: {:?}", enemy.health);
-                        });
-
-                        commands.entity(*entity2).despawn_recursive();
+                    enemy_query.get_mut(*entity1).ok().map(|mut enemy| {
+                        enemy.health -= bullet.damage;
+                        info!("enemy health: {:?}", enemy.health);
                     });
+
+                    commands.entity(*entity2).despawn_recursive();
+                });
 
                 enemy_query.get_mut(*entity1).ok().map(|_enemy| {
                     info!("enemy went into range");

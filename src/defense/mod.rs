@@ -1,12 +1,9 @@
 use bevy::prelude::*;
-// use bevy_rapier3d::prelude::*;
 
 pub mod components;
 mod systems;
-mod events;
 
 use systems::*;
-// use events::*;
 
 pub struct DefensePlugin;
 
