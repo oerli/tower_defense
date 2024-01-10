@@ -13,7 +13,7 @@ pub fn setup_enemies(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
             material: materials.add(Color::rgb(0.5, 0.4, 0.3).into()),
-            transform: Transform::from_xyz(-5.0, 0.0, -4.0),
+            transform: Transform::from_xyz(-8.0, 0.0, -8.0),
             ..Default::default()
         },
         RigidBody::Dynamic,
@@ -23,8 +23,14 @@ pub fn setup_enemies(
             angvel: Vec3::new(0.0, 0.0, 0.0),
         },
         ActiveEvents::COLLISION_EVENTS,
-        CollisionGroups::new(Group::GROUP_3, Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4),
-        Enemy { speed: 0.1, health: 10 },
+        CollisionGroups::new(
+            Group::GROUP_3,
+            Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
+        ),
+        Enemy {
+            speed: 0.1,
+            health: 10,
+        },
     ));
 }
 
@@ -50,10 +56,7 @@ pub fn enemy_movement(
     }
 }
 
-pub fn enemy_destroyed(
-    mut commands: Commands,
-    mut query: Query<(Entity, &Enemy)>,
-) {
+pub fn enemy_destroyed(mut commands: Commands, mut query: Query<(Entity, &Enemy)>) {
     for (entity, enemy) in query.iter_mut() {
         if enemy.health <= 0 {
             commands.entity(entity).despawn();
