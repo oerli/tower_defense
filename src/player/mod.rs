@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-mod resources;
+pub mod resources;
 
 use resources::*;
 pub struct PlayerPlugin;

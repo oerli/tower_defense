@@ -3,9 +3,9 @@ use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::PanOrbitCamera;
 use bevy_rapier3d::prelude::*;
 
-use crate::events::*;
+use crate::{events::*, player::resources::*};
 
-pub fn setup_graphics(mut commands: Commands) {
+pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // add light
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
@@ -31,6 +31,14 @@ pub fn setup_physics(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // create the ground
+    commands.spawn((
+        Collider::cuboid(8.0, 0.05, 8.0),
+        CollisionGroups::new(Group::GROUP_4, Group::all()),
+        TransformBundle::from(Transform::from_xyz(-0.5, -0.6, -0.5)),
+        Pickable::IGNORE,
+    ));
+
+    // create tiles
     for x in -8..8 {
         for y in -8..8 {
             commands.spawn((
@@ -42,7 +50,7 @@ pub fn setup_physics(
                 },
                 PickableBundle::default(),
                 Collider::cuboid(0.50, 0.05, 0.5),
-                CollisionGroups::new(Group::GROUP_4, Group::all()),
+                CollisionGroups::new(Group::GROUP_5, Group::GROUP_5),
                 On::<Pointer<Click>>::send_event::<BuildEvent>(),
             ));
         }

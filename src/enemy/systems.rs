@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::player::resources::*;
+
 use super::components::*;
 use super::resources::*;
 
@@ -38,6 +40,7 @@ pub fn enemy_movement(
     mut commands: Commands,
     mut query: Query<(Entity, &Enemy, &mut Velocity, &GlobalTransform)>,
     mut path: ResMut<EnemyPath>,
+    mut player: ResMut<Player>,
 ) {
     for (entity, enemy, mut velocity, position) in query.iter_mut() {
         if path.waypoints.len() > 0 {
@@ -51,6 +54,8 @@ pub fn enemy_movement(
                 velocity.linvel += direction * enemy.speed;
             }
         } else {
+            // enemy reached goal
+            player.score -= 1;
             commands.entity(entity).despawn();
         }
     }

@@ -44,6 +44,7 @@ pub fn build_event(
                     RigidBody::Dynamic,
                     Defense {
                         targets: vec![],
+                        damage: 1,
                         shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
                     },
                     Collider::ball(3.0),

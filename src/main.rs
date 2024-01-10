@@ -5,6 +5,7 @@ use bevy_rapier3d::prelude::*;
 
 mod events;
 mod systems;
+mod components;
 
 mod bullet;
 mod defense;
