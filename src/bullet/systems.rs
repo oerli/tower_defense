@@ -13,7 +13,6 @@ pub fn bullet_expired(
         lifetime.timer.tick(time.delta());
 
         if lifetime.timer.finished() {
-            info!("Bullet expired: {:?}", entity);
             commands.entity(entity).despawn_recursive();
         }
     }

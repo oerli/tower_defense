@@ -32,6 +32,7 @@ pub fn setup_enemies(
         Enemy {
             speed: 0.1,
             health: 10,
+            score: 10,
         },
     ));
 }
@@ -55,15 +56,17 @@ pub fn enemy_movement(
             }
         } else {
             // enemy reached goal
-            player.score -= 1;
+            player.lives -= 1;
             commands.entity(entity).despawn();
         }
     }
 }
 
-pub fn enemy_destroyed(mut commands: Commands, mut query: Query<(Entity, &Enemy)>) {
+pub fn enemy_destroyed(mut commands: Commands, mut query: Query<(Entity, &Enemy)>, mut player: ResMut<Player>) {
     for (entity, enemy) in query.iter_mut() {
         if enemy.health <= 0 {
+
+            player.score += enemy.score;
             commands.entity(entity).despawn();
         }
     }

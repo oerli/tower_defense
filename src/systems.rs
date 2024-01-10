@@ -23,6 +23,17 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
             ..Default::default()
         },
     ));
+
+    // show player score
+    commands.spawn((
+        TextBundle::from_sections([
+            TextSection::new("Lives: ", TextStyle::default()),
+            TextSection::new(format!("{}", player.lives), TextStyle::default()),
+            TextSection::new(" Score: ", TextStyle::default()),
+            TextSection::new(format!("{}", player.score), TextStyle::default()),
+        ]),
+        PlayerText,
+    ));
 }
 
 pub fn setup_physics(
@@ -54,5 +65,15 @@ pub fn setup_physics(
                 On::<Pointer<Click>>::send_event::<BuildEvent>(),
             ));
         }
+    }
+}
+
+#[derive(Component)]
+pub struct PlayerText;
+
+pub fn update_text(mut query: Query<&mut Text, With<PlayerText>>, player: Res<Player>) {
+    for mut text in &mut query {
+        text.sections[1].value = format!("{}", player.lives);
+        text.sections[3].value = format!("{}", player.score);
     }
 }

@@ -38,5 +38,6 @@ fn main() {
         .add_systems(Startup, setup_graphics)
         .add_systems(Startup, setup_physics)
         .add_systems(Update, build_event.run_if(on_event::<BuildEvent>()))
+        .add_systems(Update, update_text)
         .run();
 }
