@@ -42,13 +42,13 @@ pub fn enemy_contact(
                 });
             }
             CollisionEvent::Stopped(entity1, entity2, _flags) => {
-                enemy_query.get_mut(*entity2).ok().map(|_enemy| {
+                enemy_query.get(*entity2).ok().map(|_enemy| {
                     defense_query.get_mut(*entity1).ok().map(|mut defense| {
                         defense.targets.retain(|&x| x != *entity2);
                     });
                 });
 
-                enemy_query.get_mut(*entity1).ok().map(|_enemy| {
+                enemy_query.get(*entity1).ok().map(|_enemy| {
                     defense_query.get_mut(*entity2).ok().map(|mut defense| {
                         defense.targets.retain(|&x| x != *entity1);
                     });
