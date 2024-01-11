@@ -3,7 +3,7 @@ use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::PanOrbitCamera;
 use bevy_rapier3d::prelude::*;
 
-use crate::{events::*, player::resources::*, components::*};
+use crate::{events::*, player::resources::*, components::*, GameState};
 
 pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // add light
@@ -15,11 +15,12 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // create the camera
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(-3.0, 3.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz(0.0, 15.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         },
         PanOrbitCamera {
             button_orbit: MouseButton::Middle,
+            focus: Vec3::new(0.0, 1.0, 2.0),
             ..Default::default()
         },
     ));
@@ -79,5 +80,19 @@ pub fn update_text(mut query: Query<&mut Text, With<PlayerText>>, player: Res<Pl
         text.sections[1].value = format!("{}", player.level);
         text.sections[3].value = format!("{}", player.lives);
         text.sections[5].value = format!("{}", player.score);
+    }
+}
+
+pub fn change_game_state(
+    keyboard_input: Res<Input<KeyCode>>,
+    game_state: Res<State<GameState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        if *game_state.get() == GameState::Playing {
+            next_game_state.set(GameState::Paused);
+        } else {
+            next_game_state.set(GameState::Playing);
+        }
     }
 }

@@ -10,6 +10,8 @@ use resources::*;
 use systems::*;
 use events::*;
 
+use crate::GameState;
+
 pub struct EnemyPlugin;
 
 impl Plugin for EnemyPlugin {
@@ -20,7 +22,7 @@ impl Plugin for EnemyPlugin {
             // Events
             .add_systems(Update, enemy_contact.run_if(on_event::<CollisionEvent>()))
             // Systems
-            .add_systems(Update, enemy_destroyed)
-            .add_systems(Update, enemy_movement);
+            .add_systems(Update, enemy_destroyed.run_if(in_state(GameState::Playing)))
+            .add_systems(Update, enemy_movement.run_if(in_state(GameState::Playing)));
     }
 }

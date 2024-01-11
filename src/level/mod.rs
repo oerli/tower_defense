@@ -5,6 +5,8 @@ pub mod components;
 
 use systems::*;
 
+use crate::GameState;
+
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
@@ -12,6 +14,6 @@ impl Plugin for LevelPlugin {
         app
             // Systems
             .add_systems(PostStartup, setup_level)
-            .add_systems(Update, spawn_enemies);
+            .add_systems(Update, spawn_enemies.run_if(in_state(GameState::Playing)));
     }
 }
