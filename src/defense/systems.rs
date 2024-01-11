@@ -31,13 +31,9 @@ pub fn defense_shooting(
                         },
                         RigidBody::Dynamic,
                         Collider::cuboid(0.1, 0.1, 0.1),
-                        // Velocity {
-                        //     linvel: enemy.translation() - transform.translation(),
-                        //     angvel: Vec3::new(0.0, 0.0, 0.0),
-                        // },
                         ExternalImpulse {
                             impulse: (enemy.translation() - transform.translation()) * 0.05,
-                            torque_impulse: Vec3::new(0.1, 0.1, 0.1),
+                            torque_impulse: Vec3::new(0.0, 0.0, 0.0),
                         },
                         Bullet::new(enemy.translation(), 1.0, defense.damage),
                         CollisionGroups::new(Group::GROUP_1, Group::GROUP_3 | Group::GROUP_4),

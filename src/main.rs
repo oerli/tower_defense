@@ -11,6 +11,7 @@ mod bullet;
 mod defense;
 mod enemy;
 mod player;
+mod level;
 
 use events::*;
 use systems::*;
@@ -19,6 +20,7 @@ use bullet::BulletPlugin;
 use defense::DefensePlugin;
 use enemy::EnemyPlugin;
 use player::PlayerPlugin;
+use level::LevelPlugin;
 
 fn main() {
     App::new()
@@ -32,6 +34,7 @@ fn main() {
         .add_plugins(EnemyPlugin)
         .add_plugins(DefensePlugin)
         .add_plugins(BulletPlugin)
+        .add_plugins(LevelPlugin)
         // Events
         .add_event::<BuildEvent>()
         // Systems

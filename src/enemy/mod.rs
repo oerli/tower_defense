@@ -20,7 +20,6 @@ impl Plugin for EnemyPlugin {
             // Events
             .add_systems(Update, enemy_contact.run_if(on_event::<CollisionEvent>()))
             // Systems
-            .add_systems(Startup, setup_enemies)
             .add_systems(Update, enemy_destroyed)
             .add_systems(Update, enemy_movement);
     }

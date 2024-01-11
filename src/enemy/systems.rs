@@ -1,55 +1,27 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::level::components::*;
 use crate::player::resources::*;
 
 use super::components::*;
-use super::resources::*;
-
-pub fn setup_enemies(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    commands.spawn((
-        PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
-            material: materials.add(Color::rgb(0.5, 0.4, 0.3).into()),
-            transform: Transform::from_xyz(-8.0, 0.0, -8.0),
-            ..Default::default()
-        },
-        RigidBody::Dynamic,
-        Collider::cuboid(0.5, 0.5, 0.5),
-        Velocity {
-            linvel: Vec3::new(0.0, 0.0, 0.0),
-            angvel: Vec3::new(0.0, 0.0, 0.0),
-        },
-        ActiveEvents::COLLISION_EVENTS,
-        CollisionGroups::new(
-            Group::GROUP_3,
-            Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
-        ),
-        Enemy {
-            speed: 0.1,
-            health: 10,
-            score: 10,
-        },
-    ));
-}
 
 pub fn enemy_movement(
     mut commands: Commands,
-    mut query: Query<(Entity, &Enemy, &mut Velocity, &GlobalTransform)>,
-    mut path: ResMut<EnemyPath>,
+    mut query: Query<(Entity, &mut Enemy, &mut Velocity, &GlobalTransform)>,
+    query_level: Query<&Level>,
     mut player: ResMut<Player>,
 ) {
-    for (entity, enemy, mut velocity, position) in query.iter_mut() {
-        if path.waypoints.len() > 0 {
-            let mut direction = path.waypoints[0] - position.translation();
+    let level = query_level.get_single().unwrap();
+
+    for (entity, mut enemy, mut velocity, position) in query.iter_mut() {
+        if enemy.waypoint < level.waypoints.len() {
+            let mut direction = level.waypoints[enemy.waypoint] - position.translation();
             direction.y = 0.0;
             let distance = direction.length();
+
             if distance < 0.5 {
-                path.waypoints.remove(0);
+                enemy.waypoint += 1;
             } else {
                 direction = direction.normalize();
                 velocity.linvel += direction * enemy.speed;
@@ -62,10 +34,13 @@ pub fn enemy_movement(
     }
 }
 
-pub fn enemy_destroyed(mut commands: Commands, mut query: Query<(Entity, &Enemy)>, mut player: ResMut<Player>) {
+pub fn enemy_destroyed(
+    mut commands: Commands,
+    mut query: Query<(Entity, &Enemy)>,
+    mut player: ResMut<Player>,
+) {
     for (entity, enemy) in query.iter_mut() {
         if enemy.health <= 0 {
-
             player.score += enemy.score;
             commands.entity(entity).despawn();
         }

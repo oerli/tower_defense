@@ -5,3 +5,6 @@ use bevy::prelude::*;
 pub struct Lifetime {
     pub timer: Timer,
 }
+
+#[derive(Component)]
+pub struct Tile;

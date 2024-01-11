@@ -3,7 +3,7 @@ use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::PanOrbitCamera;
 use bevy_rapier3d::prelude::*;
 
-use crate::{events::*, player::resources::*};
+use crate::{events::*, player::resources::*, components::*};
 
 pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // add light
@@ -27,7 +27,9 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // show player score
     commands.spawn((
         TextBundle::from_sections([
-            TextSection::new("Lives: ", TextStyle::default()),
+            TextSection::new("Level: ", TextStyle::default()),
+            TextSection::new(format!("{}", player.level), TextStyle::default()),
+            TextSection::new(" Lives: ", TextStyle::default()),
             TextSection::new(format!("{}", player.lives), TextStyle::default()),
             TextSection::new(" Score: ", TextStyle::default()),
             TextSection::new(format!("{}", player.score), TextStyle::default()),
@@ -63,6 +65,7 @@ pub fn setup_physics(
                 Collider::cuboid(0.50, 0.05, 0.5),
                 CollisionGroups::new(Group::GROUP_5, Group::GROUP_5),
                 On::<Pointer<Click>>::send_event::<BuildEvent>(),
+                Tile,
             ));
         }
     }
@@ -73,7 +76,8 @@ pub struct PlayerText;
 
 pub fn update_text(mut query: Query<&mut Text, With<PlayerText>>, player: Res<Player>) {
     for mut text in &mut query {
-        text.sections[1].value = format!("{}", player.lives);
-        text.sections[3].value = format!("{}", player.score);
+        text.sections[1].value = format!("{}", player.level);
+        text.sections[3].value = format!("{}", player.lives);
+        text.sections[5].value = format!("{}", player.score);
     }
 }
