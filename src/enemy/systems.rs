@@ -8,14 +8,17 @@ use super::components::*;
 
 pub fn enemy_movement(
     mut commands: Commands,
-    mut query: Query<(Entity, &mut Enemy, &mut Velocity, &GlobalTransform)>,
+    mut query: Query<(Entity, &mut Enemy, &mut Velocity, &GlobalTransform, &mut Transform)>,
     query_level: Query<&Level>,
     mut player: ResMut<Player>,
 ) {
     let level = query_level.get_single().unwrap();
 
-    for (entity, mut enemy, mut velocity, position) in query.iter_mut() {
+    for (entity, mut enemy, mut velocity, position, mut transform) in query.iter_mut() {
         if enemy.waypoint < level.waypoints.len() {
+
+            transform.look_at(level.waypoints[enemy.waypoint], Vec3::ZERO);
+
             let mut direction = level.waypoints[enemy.waypoint] - position.translation();
             direction.y = 0.0;
             let distance = direction.length();
