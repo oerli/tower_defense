@@ -23,8 +23,6 @@ pub fn build_event(
     mut build_events: EventReader<BuildEvent>,
     transform_query: Query<&GlobalTransform>,
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
     for event in build_events.read() {
@@ -41,12 +39,6 @@ pub fn build_event(
                         transform: transform.clone().into(),
                         ..Default::default()
                     },
-                    // PbrBundle {
-                    //     mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
-                    //     material: materials.add(Color::rgb(0.3, 0.4, 0.5).into()),
-                    //     transform: transform.clone().into(),
-                    //     ..Default::default()
-                    // },
                     RigidBody::Dynamic,
                     Defense {
                         targets: vec![],

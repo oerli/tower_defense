@@ -1,6 +1,10 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
+
+use rand::Rng;
 
 use crate::components::*;
 use crate::enemy::components::*;
@@ -10,9 +14,8 @@ use super::components::*;
 
 pub fn setup_level(
     mut commands: Commands,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     query_tiles: Query<(Entity, &Transform), With<Tile>>,
-    query_material: Query<&Handle<StandardMaterial>>,
+    query_children: Query<&Children>,
     asset_server: Res<AssetServer>,
 ) {
 
@@ -50,16 +53,39 @@ pub fn setup_level(
         Vec3::new(7.0, 0.0, 7.0),
     ];
 
+    let mut rng = rand::thread_rng();
+
     for (entity, transform) in query_tiles.iter() {
         for position in waypoints.iter() {
             if transform.translation.x == position.x && transform.translation.z == position.z {
                 commands.entity(entity).remove::<On<Pointer<Click>>>();
-                if let Ok(material_handle) = query_material.get(entity) {
-                    if let Some(material) = materials.get_mut(material_handle) {
-                        // Modify the color of the material
-                        material.base_color = Color::BLUE;
+                commands.entity(entity).remove::<SceneBundle>();
+
+                // remove possible decorations
+                match query_children.get(entity) {
+                    Ok(children) => {
+                        for child in children.iter() {
+                            commands.entity(*child).remove::<SceneBundle>();
+                        }
                     }
+                    Err(_) => {}
                 }
+                
+                commands.entity(entity).insert(
+                SceneBundle {
+                    scene: asset_server.load("models/path.glb#Scene0"),
+                    transform: Transform::from_xyz(position.x, 0.0, position.z),
+                    ..Default::default()
+                }).with_children(|parent| {
+                    // create some dirt on street
+                    if 0.3 > rng.gen() {
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/dirt.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                            ..Default::default()
+                        });
+                    }
+                });
             }
         }
     }
@@ -72,15 +98,12 @@ pub fn setup_level(
 
     commands.insert_resource(Animations(vec![
         asset_server.load("models/orc.glb#Animation3"),
-        // asset_server.load("models/orc.glb#Animation1"),
-        // asset_server.load("models/orc.glb#Animation0"),
+        asset_server.load("models/orc.glb#Animation9"),
     ]));
 }
 
 pub fn spawn_enemies(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
     mut query: Query<&mut Level>,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
@@ -98,14 +121,9 @@ pub fn spawn_enemies(
             commands.spawn((
                 SceneBundle {
                     scene: asset_server.load("models/orc.glb#Scene0"),
+                    transform: Transform::from_xyz(-8.0, 0.0, -8.0),
                     ..Default::default()
                 },
-                // PbrBundle {
-                //     mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
-                //     material: materials.add(Color::rgb(0.5, 0.4, 0.3).into()),
-                //     transform: Transform::from_xyz(-8.0, 0.0, -8.0),
-                //     ..Default::default()
-                // },
                 RigidBody::Dynamic,
                 Collider::cuboid(0.5, 0.5, 0.5),
                 Velocity {
