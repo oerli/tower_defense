@@ -52,7 +52,12 @@ pub fn enemy_movement(
             // TODO: add a delay before despawning the enemy
             for entity in children.iter_descendants(entity) {
                 if let Ok(mut animation_player) = animation_players.get_mut(entity) {
-                    animation_player.play_with_transition(animations.0[2].clone_weak(), Duration::from_millis(250)).set_repeat(RepeatAnimation::Count(8));
+                    animation_player
+                        .play_with_transition(
+                            animations.0[2].clone_weak(),
+                            Duration::from_millis(250),
+                        )
+                        .set_repeat(RepeatAnimation::Count(8));
                 }
             }
             commands.entity(entity).remove::<Enemy>();
@@ -66,7 +71,7 @@ pub fn enemy_destroyed(
     mut player: ResMut<Player>,
     mut animation_players: Query<&mut AnimationPlayer>,
     animations: Res<Animations>,
-    children: Query<&Children>
+    children: Query<&Children>,
 ) {
     for (entity, enemy) in query.iter() {
         if enemy.health <= 0 {
@@ -75,7 +80,10 @@ pub fn enemy_destroyed(
             // find an animation player among the descendants of the thing, there's only one in my case
             for entity in children.iter_descendants(entity) {
                 if let Ok(mut animation_player) = animation_players.get_mut(entity) {
-                    animation_player.play_with_transition(animations.0[1].clone_weak(), Duration::from_millis(250));
+                    animation_player.play_with_transition(
+                        animations.0[1].clone_weak(),
+                        Duration::from_millis(250),
+                    );
                 }
             }
 

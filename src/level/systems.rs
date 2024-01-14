@@ -16,7 +16,6 @@ pub fn setup_level(
     query_children: Query<&Children>,
     asset_server: Res<AssetServer>,
 ) {
-
     let waypoints = vec![
         Vec3::new(-8.0, 0.0, -8.0),
         Vec3::new(-7.0, 0.0, -8.0),
@@ -68,22 +67,24 @@ pub fn setup_level(
                     }
                     Err(_) => {}
                 }
-                
-                commands.entity(entity).insert(
-                SceneBundle {
-                    scene: asset_server.load("models/path.glb#Scene0"),
-                    transform: Transform::from_xyz(position.x, 0.0, position.z),
-                    ..Default::default()
-                }).with_children(|parent| {
-                    // create some dirt on street
-                    if 0.3 > rng.gen() {
-                        parent.spawn(SceneBundle {
-                            scene: asset_server.load("models/dirt.glb#Scene0"),
-                            transform: Transform::from_xyz(0.0, 0.2, 0.0),
-                            ..Default::default()
-                        });
-                    }
-                });
+
+                commands
+                    .entity(entity)
+                    .insert(SceneBundle {
+                        scene: asset_server.load("models/path.glb#Scene0"),
+                        transform: Transform::from_xyz(position.x, 0.0, position.z),
+                        ..Default::default()
+                    })
+                    .with_children(|parent| {
+                        // create some dirt on street
+                        if 0.3 > rng.gen() {
+                            parent.spawn(SceneBundle {
+                                scene: asset_server.load("models/dirt.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                                ..Default::default()
+                            });
+                        }
+                    });
             }
         }
     }
@@ -117,33 +118,60 @@ pub fn spawn_enemies(
 
         level.separation_timer.tick(time.delta());
 
-        if level.separation_timer.finished() {            
+        if level.separation_timer.finished() {
             level.enemies -= 1;
 
-            commands.spawn((
-                SceneBundle {
-                    scene: asset_server.load("models/orc.glb#Scene0"),
-                    transform: Transform::from_xyz(-8.0, 0.0, -8.0),
-                    ..Default::default()
-                },
-                RigidBody::Dynamic,
-                Collider::cuboid(0.5, 0.5, 0.5),
-                Velocity {
-                    linvel: Vec3::new(0.0, 0.0, 0.0),
-                    angvel: Vec3::new(0.0, 0.0, 0.0),
-                },
-                ActiveEvents::COLLISION_EVENTS,
-                CollisionGroups::new(
-                    Group::GROUP_3,
-                    Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
-                ),
-                Enemy {
-                    speed: 0.1,
-                    health: 3,
-                    score: 10,
-                    waypoint: 0,
-                },
-            ));
+            let enemy = Enemy {
+                speed: 0.1,
+                health: 3,
+                score: 10,
+                waypoint: 0,
+            };
+
+            commands
+                .spawn((
+                    SceneBundle {
+                        scene: asset_server.load("models/orc.glb#Scene0"),
+                        transform: Transform::from_xyz(-8.0, 0.0, -8.0),
+                        ..Default::default()
+                    },
+                    RigidBody::Dynamic,
+                    Collider::cuboid(0.5, 0.5, 0.5),
+                    Velocity {
+                        linvel: Vec3::new(0.0, 0.0, 0.0),
+                        angvel: Vec3::new(0.0, 0.0, 0.0),
+                    },
+                    ActiveEvents::COLLISION_EVENTS,
+                    CollisionGroups::new(
+                        Group::GROUP_3,
+                        Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
+                    ),
+                    enemy.clone(),
+                ))
+                .with_children(|parent| {
+                    for health in 1..enemy.health + 1 {
+                        if health % 2 == 0 {
+                            parent.spawn((
+                                SceneBundle {
+                                    scene: asset_server.load("models/health.glb#Scene0"),
+                                    transform: Transform::from_xyz(health as f32 * 0.1, 1.0, 0.0),
+                                    ..Default::default()
+                                },
+                                EnemyHealth,
+                            ));
+                        } else {
+                            parent.spawn((
+                                SceneBundle {
+                                    scene: asset_server.load("models/health.glb#Scene0"),
+                                    transform: Transform::from_xyz(health as f32 * -0.1 + 0.1, 1.0, 0.0),
+                                    ..Default::default()
+                                },
+                                EnemyHealth,
+                            ));
+                        }
+                        
+                    }
+                });
         }
     }
 }
