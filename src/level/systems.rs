@@ -4,6 +4,7 @@ use bevy_rapier3d::prelude::*;
 
 use crate::components::*;
 use crate::enemy::components::*;
+use crate::resources::*;
 
 use super::components::*;
 
@@ -12,6 +13,7 @@ pub fn setup_level(
     mut materials: ResMut<Assets<StandardMaterial>>,
     query_tiles: Query<(Entity, &Transform), With<Tile>>,
     query_material: Query<&Handle<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
 
     let waypoints = vec![
@@ -67,6 +69,12 @@ pub fn setup_level(
         separation_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
         waypoints,
     });
+
+    commands.insert_resource(Animations(vec![
+        asset_server.load("models/orc.glb#Animation3"),
+        // asset_server.load("models/orc.glb#Animation1"),
+        // asset_server.load("models/orc.glb#Animation0"),
+    ]));
 }
 
 pub fn spawn_enemies(
@@ -75,6 +83,7 @@ pub fn spawn_enemies(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut query: Query<&mut Level>,
     time: Res<Time>,
+    asset_server: Res<AssetServer>,
 ) {
     for mut level in query.iter_mut() {
         if level.enemies <= 0 {
@@ -87,12 +96,16 @@ pub fn spawn_enemies(
             level.enemies -= 1;
 
             commands.spawn((
-                PbrBundle {
-                    mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
-                    material: materials.add(Color::rgb(0.5, 0.4, 0.3).into()),
-                    transform: Transform::from_xyz(-8.0, 0.0, -8.0),
-                    ..Default::default()
+                SceneBundle {
+                    scene: asset_server.load("models/orc.glb#Scene0"),
+                    ..default()
                 },
+                // PbrBundle {
+                //     mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
+                //     material: materials.add(Color::rgb(0.5, 0.4, 0.3).into()),
+                //     transform: Transform::from_xyz(-8.0, 0.0, -8.0),
+                //     ..Default::default()
+                // },
                 RigidBody::Dynamic,
                 Collider::cuboid(0.5, 0.5, 0.5),
                 Velocity {

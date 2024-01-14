@@ -3,7 +3,7 @@ use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::PanOrbitCamera;
 use bevy_rapier3d::prelude::*;
 
-use crate::{events::*, player::resources::*, components::*, GameState};
+use crate::{events::*, player::resources::*, components::*, GameState, resources::*};
 
 pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // add light
@@ -46,7 +46,7 @@ pub fn setup_physics(
 ) {
     // create the ground
     commands.spawn((
-        Collider::cuboid(8.0, 0.05, 8.0),
+        Collider::cuboid(9.0, 0.05, 9.0),
         CollisionGroups::new(Group::GROUP_4, Group::all()),
         TransformBundle::from(Transform::from_xyz(-0.5, -0.6, -0.5)),
         Pickable::IGNORE,
@@ -94,5 +94,16 @@ pub fn change_game_state(
         } else {
             next_game_state.set(GameState::Playing);
         }
+    }
+}
+
+
+// once the scene is loaded, start the animation
+pub fn play_animations(
+    animations: Res<Animations>,
+    mut players: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
+) {
+    for mut player in &mut players {
+        player.play(animations.0[0].clone_weak()).repeat();
     }
 }

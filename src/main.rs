@@ -6,6 +6,7 @@ use bevy_rapier3d::prelude::*;
 mod events;
 mod systems;
 mod components;
+mod resources;
 
 mod bullet;
 mod defense;
@@ -45,6 +46,7 @@ fn main() {
         .add_systems(Update, build_event.run_if(on_event::<BuildEvent>()))
         .add_systems(Update, update_text)
         .add_systems(Update, change_game_state)
+        .add_systems(Update, play_animations.run_if(in_state(GameState::Playing)))
         .run();
 }
 
