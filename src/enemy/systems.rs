@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 use std::time::Duration;
 
+use bevy::animation::RepeatAnimation;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
@@ -22,6 +23,9 @@ pub fn enemy_movement(
     )>,
     query_level: Query<&Level>,
     mut player: ResMut<Player>,
+    mut animation_players: Query<&mut AnimationPlayer>,
+    animations: Res<Animations>,
+    children: Query<&Children>,
 ) {
     let level = query_level.get_single().unwrap();
 
@@ -44,7 +48,14 @@ pub fn enemy_movement(
         } else if enemy.health > 0 {
             // enemy reached goal
             player.lives -= 1;
-            commands.entity(entity).despawn();
+
+            // TODO: add a delay before despawning the enemy
+            for entity in children.iter_descendants(entity) {
+                if let Ok(mut animation_player) = animation_players.get_mut(entity) {
+                    animation_player.play_with_transition(animations.0[2].clone_weak(), Duration::from_millis(250)).set_repeat(RepeatAnimation::Count(8));
+                }
+            }
+            commands.entity(entity).remove::<Enemy>();
         }
     }
 }

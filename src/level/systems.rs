@@ -95,8 +95,12 @@ pub fn setup_level(
     });
 
     commands.insert_resource(Animations(vec![
+        // running animation
         asset_server.load("models/orc.glb#Animation3"),
+        // dying animation
         asset_server.load("models/orc.glb#Animation9"),
+        // jumping animation
+        asset_server.load("models/orc.glb#Animation5"),
     ]));
 }
 
