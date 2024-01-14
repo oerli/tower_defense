@@ -1,12 +1,10 @@
 use std::f32::consts::PI;
-use std::time::Duration;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::level::components::*;
-use crate::player::{self, resources::*};
-use crate::resources::*;
+use crate::player::resources::*;
 
 use super::components::*;
 

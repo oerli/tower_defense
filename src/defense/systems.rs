@@ -27,8 +27,14 @@ pub fn defense_shooting(
                 if let Ok(enemy) = enemy_query.get(target) {
                     commands.spawn((
                         PbrBundle {
-                            mesh: meshes.add(Mesh::try_from(shape::Box::new(0.2, 0.2, 0.2)).unwrap()),
-                            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+                            mesh: meshes.add(
+                                Mesh::try_from(shape::Icosphere {
+                                    radius: 0.1,
+                                    subdivisions: 8,
+                                })
+                                .unwrap(),
+                            ),
+                            material: materials.add(Color::BLACK.into()),
                             transform: Transform::from_translation(
                                 transform.translation() + Vec3::new(0.0, 0.5, 0.0),
                             ),
@@ -46,7 +52,7 @@ pub fn defense_shooting(
                             timer: Timer::from_seconds(1.0, TimerMode::Once),
                         },
                     ));
-    
+
                     defense.shooting_timer.reset();
                     // put back the target
                     defense.targets.insert(0, target);
@@ -56,6 +62,5 @@ pub fn defense_shooting(
                 break;
             }
         }
-        
     }
 }
