@@ -25,6 +25,7 @@ pub fn build_event(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     for event in build_events.read() {
         if event.button != PointerButton::Primary {
@@ -35,12 +36,17 @@ pub fn build_event(
         transform_query.get(event.entity).ok().map(|transform| {
             commands
                 .spawn((
-                    PbrBundle {
-                        mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
-                        material: materials.add(Color::rgb(0.3, 0.4, 0.5).into()),
+                    SceneBundle {
+                        scene: asset_server.load("models/tower.glb#Scene0"),
                         transform: transform.clone().into(),
                         ..Default::default()
                     },
+                    // PbrBundle {
+                    //     mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
+                    //     material: materials.add(Color::rgb(0.3, 0.4, 0.5).into()),
+                    //     transform: transform.clone().into(),
+                    //     ..Default::default()
+                    // },
                     RigidBody::Dynamic,
                     Defense {
                         targets: vec![],

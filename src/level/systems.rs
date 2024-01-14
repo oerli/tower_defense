@@ -98,7 +98,7 @@ pub fn spawn_enemies(
             commands.spawn((
                 SceneBundle {
                     scene: asset_server.load("models/orc.glb#Scene0"),
-                    ..default()
+                    ..Default::default()
                 },
                 // PbrBundle {
                 //     mesh: meshes.add(Mesh::from(shape::Box::new(1.0, 1.0, 1.0))),
