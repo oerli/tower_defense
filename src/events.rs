@@ -3,6 +3,7 @@ use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::defense::components::*;
+use crate::player::resources::*;
 
 #[derive(Event)]
 pub struct BuildEvent {
@@ -24,10 +25,18 @@ pub fn build_event(
     transform_query: Query<&GlobalTransform>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
+    mut player: ResMut<Player>,
 ) {
     for event in build_events.read() {
         if event.button != PointerButton::Primary {
             continue;
+        }
+
+        // check if the player has enough money
+        if player.score < 10 {
+            continue;
+        } else {
+            player.score -= 10;
         }
 
         // spawn the defense
