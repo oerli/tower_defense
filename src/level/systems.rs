@@ -89,8 +89,8 @@ pub fn setup_level(
     }
 
     commands.spawn(Level {
-        enemies: 10,
-        separation_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+        enemies: 5,
+        separation_timer: Timer::from_seconds(2.2, TimerMode::Repeating),
         waypoints,
     });
 
@@ -139,7 +139,7 @@ pub fn spawn_enemies(
                 ),
                 Enemy {
                     speed: 0.1,
-                    health: 10,
+                    health: 3,
                     score: 10,
                     waypoint: 0,
                 },

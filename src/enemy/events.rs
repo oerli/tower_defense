@@ -23,7 +23,7 @@ pub fn enemy_contact(
 
                 enemy_query.get_mut(*entity2).ok().map(|_enemy| {
                     defense_query.get_mut(*entity1).ok().map(|mut defense| {
-                        defense.targets.push(*entity2);
+                        defense.targets.push_back(*entity2);
                     });
                 });
 
@@ -37,7 +37,7 @@ pub fn enemy_contact(
 
                 enemy_query.get_mut(*entity1).ok().map(|_enemy| {
                     defense_query.get_mut(*entity2).ok().map(|mut defense| {
-                        defense.targets.push(*entity1);
+                        defense.targets.push_back(*entity1);
                     });
                 });
             }

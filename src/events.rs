@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -50,7 +52,7 @@ pub fn build_event(
                     },
                     RigidBody::Dynamic,
                     Defense {
-                        targets: vec![],
+                        targets: VecDeque::new(),
                         damage: 1,
                         shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
                     },

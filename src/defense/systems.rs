@@ -23,7 +23,7 @@ pub fn defense_shooting(
 
         // check if target is still alive
         loop {
-            if let Some(target) = defense.targets.pop() {
+            if let Some(target) = defense.targets.pop_front() {
                 if let Ok(enemy) = enemy_query.get(target) {
                     commands.spawn((
                         PbrBundle {
@@ -55,7 +55,7 @@ pub fn defense_shooting(
 
                     defense.shooting_timer.reset();
                     // put back the target
-                    defense.targets.insert(0, target);
+                    defense.targets.push_front(target);
                     break;
                 }
             } else {
