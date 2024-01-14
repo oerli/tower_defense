@@ -72,6 +72,7 @@ pub fn enemy_destroyed(
     mut animation_players: Query<&mut AnimationPlayer>,
     animations: Res<Animations>,
     children: Query<&Children>,
+    mut collision_group_query: Query<&mut CollisionGroups>,
 ) {
     for (entity, enemy) in query.iter() {
         if enemy.health <= 0 {
@@ -89,6 +90,9 @@ pub fn enemy_destroyed(
 
             // TODO: add a delay before despawning the enemy
             commands.entity(entity).remove::<Enemy>();
+            if let Ok(mut groups) = collision_group_query.get_mut(entity) {
+                groups.memberships = Group::GROUP_5;
+            };
         }
     }
 }
