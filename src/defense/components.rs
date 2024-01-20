@@ -9,3 +9,6 @@ pub struct Defense {
     pub damage: i32,
     pub shooting_timer: Timer,
 }
+
+#[derive(Component)]
+pub struct Weapon;

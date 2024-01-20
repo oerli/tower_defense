@@ -8,6 +8,11 @@ edition = "2021"
 [dependencies]
 bevy = "0.12"
 bevy_rapier3d = "0.23"
-bevy_mod_picking = { version = "0.17", features = ["backend_rapier"] }
+bevy_mod_picking = { version = "0.17", features = [
+    "backend_egui",
+    "backend_rapier",
+] }
 bevy_panorbit_camera = "0.10"
 rand = "0.8"
+bevy-inspector-egui = "0.22"
+bevy_egui = "0.24"

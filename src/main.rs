@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use bevy_rapier3d::prelude::*;
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_egui::EguiPlugin;
 
 mod events;
 mod systems;
@@ -13,6 +15,7 @@ mod defense;
 mod enemy;
 mod player;
 mod level;
+mod menu;
 
 use events::*;
 use systems::*;
@@ -22,20 +25,24 @@ use defense::DefensePlugin;
 use enemy::EnemyPlugin;
 use player::PlayerPlugin;
 use level::LevelPlugin;
+use menu::MenuPlugin;
 
 fn main() {
     App::new()
         // Plugins
         .add_plugins(DefaultPlugins)
+        // .add_plugins(WorldInspectorPlugin::new())
+        .add_plugins(EguiPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(PanOrbitCameraPlugin)
-        .add_plugins(DefaultPickingPlugins.build().disable::<RaycastBackend>())
+        .add_plugins(DefaultPickingPlugins.build().disable::<RaycastBackend>().disable::<DebugPickingPlugin>())
         .add_plugins(PlayerPlugin)
         .add_plugins(EnemyPlugin)
         .add_plugins(DefensePlugin)
         .add_plugins(BulletPlugin)
         .add_plugins(LevelPlugin)
+        .add_plugins(MenuPlugin)
         // Events
         .add_event::<BuildEvent>()
         // State

@@ -46,7 +46,7 @@ pub fn build_event(
             commands
                 .spawn((
                     SceneBundle {
-                        scene: asset_server.load("models/tower.glb#Scene0"),
+                        scene: asset_server.load("models/cannon_tower.glb#Scene0"),
                         transform: transform.clone().into(),
                         ..Default::default()
                     },
@@ -66,6 +66,14 @@ pub fn build_event(
                         Collider::cuboid(0.5, 0.5, 0.5),
                         CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
                         PickableBundle::default(),
+                    ));
+                    parent.spawn((
+                        SceneBundle {
+                            scene: asset_server.load("models/cannon.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, 0.68, 0.0),
+                            ..Default::default()
+                        },
+                        Weapon,
                     ));
                 });
         });

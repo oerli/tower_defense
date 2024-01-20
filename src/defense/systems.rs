@@ -64,3 +64,26 @@ pub fn defense_shooting(
         }
     }
 }
+
+pub fn weapon_rotation(
+    mut weapon_query: Query<(&Parent, &mut Transform), With<Weapon>>,
+    defense_query: Query<&Defense>,
+    enemy_query: Query<&GlobalTransform, With<Enemy>>,
+) {
+    for (defense_entity, mut transform) in weapon_query.iter_mut() {
+        if let Ok(defense) = defense_query.get(defense_entity.get()) {
+            if let Some(target) = defense.targets.front() {
+                if let Ok(enemy_transform) = enemy_query.get(*target) {
+                    // transform.look_at(enemy_transform.translation(), Vec3::Y);
+
+                    let direction = enemy_transform.translation() - transform.translation;
+                    let angle = direction.y.atan2(direction.x);
+                    let rotation = Quat::from_rotation_y(angle);
+
+                    transform.rotation = rotation;
+
+                }
+            }
+        }
+    }
+}
