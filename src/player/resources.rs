@@ -13,7 +13,7 @@ impl Default for Player {
         Player {
             name: "Player".to_string(),
             lives: 10,
-            score: 100,
+            score: 30,
             level: 1,
         }
     }   

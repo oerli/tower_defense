@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
-use bevy_rapier3d::prelude::*;
 
 use rand::Rng;
 
 use crate::components::*;
 use crate::enemy::components::*;
+use crate::enemy::events::*;
 use crate::resources::*;
 
 use super::components::*;
@@ -106,10 +106,9 @@ pub fn setup_level(
 }
 
 pub fn spawn_enemies(
-    mut commands: Commands,
     mut query: Query<&mut Level>,
     time: Res<Time>,
-    asset_server: Res<AssetServer>,
+    mut event_writer: EventWriter<SpawnEnemyEvent>,
 ) {
     for mut level in query.iter_mut() {
         if level.enemies <= 0 {
@@ -120,58 +119,15 @@ pub fn spawn_enemies(
 
         if level.separation_timer.finished() {
             level.enemies -= 1;
-
-            let enemy = Enemy {
-                speed: 0.1,
-                health: 3,
-                score: 10,
-                waypoint: 0,
-            };
-
-            commands
-                .spawn((
-                    SceneBundle {
-                        scene: asset_server.load("models/orc.glb#Scene0"),
-                        transform: Transform::from_xyz(-8.0, 0.0, -8.0),
-                        ..Default::default()
-                    },
-                    RigidBody::Dynamic,
-                    Collider::cuboid(0.5, 0.5, 0.5),
-                    Velocity {
-                        linvel: Vec3::new(0.0, 0.0, 0.0),
-                        angvel: Vec3::new(0.0, 0.0, 0.0),
-                    },
-                    ActiveEvents::COLLISION_EVENTS,
-                    CollisionGroups::new(
-                        Group::GROUP_3,
-                        Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
-                    ),
-                    enemy.clone(),
-                ))
-                .with_children(|parent| {
-                    for health in 1..enemy.health + 1 {
-                        if health % 2 == 0 {
-                            parent.spawn((
-                                SceneBundle {
-                                    scene: asset_server.load("models/health.glb#Scene0"),
-                                    transform: Transform::from_xyz(health as f32 * 0.1, 1.0, 0.0),
-                                    ..Default::default()
-                                },
-                                EnemyHealth,
-                            ));
-                        } else {
-                            parent.spawn((
-                                SceneBundle {
-                                    scene: asset_server.load("models/health.glb#Scene0"),
-                                    transform: Transform::from_xyz(health as f32 * -0.1 + 0.1, 1.0, 0.0),
-                                    ..Default::default()
-                                },
-                                EnemyHealth,
-                            ));
-                        }
-                        
-                    }
-                });
+            event_writer.send(SpawnEnemyEvent {
+                enemy: Enemy {
+                    speed: 0.1,
+                    health: 3,
+                    score: 10,
+                    waypoint: 0,
+                },
+                position: Vec3::new(-8.0, 0.0, -8.0),
+            });            
         }
     }
 }
