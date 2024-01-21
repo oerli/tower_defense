@@ -46,6 +46,22 @@ pub fn tower_selection(
                             .spawn(SceneBundle {
                                 scene: asset_server.load("models/cannon_tower.glb#Scene0"),
                                 ..Default::default()
+                            }).with_children(|parent|{
+                                parent.spawn((
+                                    PbrBundle {
+                                        mesh: asset_server.add(Mesh::from(shape::Torus {
+                                            radius: 2.96,
+                                            ring_radius: 0.02,
+                                            ..Default::default()
+                                        })),
+                                        material: asset_server.add(StandardMaterial {
+                                            base_color: Color::rgb(0.8, 0.2, 0.2),
+                                            ..Default::default()
+                                        }),
+                                        transform: Transform::from_xyz(0.0, 0.3, 0.0),
+                                        ..Default::default()
+                                    },
+                                ));
                             })
                             .id(),
                     );
@@ -71,6 +87,22 @@ pub fn tower_selection(
                             .spawn(SceneBundle {
                                 scene: asset_server.load("models/ballista_tower.glb#Scene0"),
                                 ..Default::default()
+                            }).with_children(|parent|{
+                                parent.spawn((
+                                    PbrBundle {
+                                        mesh: asset_server.add(Mesh::from(shape::Torus {
+                                            radius: 2.96,
+                                            ring_radius: 0.02,
+                                            ..Default::default()
+                                        })),
+                                        material: asset_server.add(StandardMaterial {
+                                            base_color: Color::rgb(0.8, 0.2, 0.2),
+                                            ..Default::default()
+                                        }),
+                                        transform: Transform::from_xyz(0.0, 0.3, 0.0),
+                                        ..Default::default()
+                                    },
+                                ));
                             })
                             .id(),
                     );
@@ -96,6 +128,23 @@ pub fn tower_selection(
                             .spawn(SceneBundle {
                                 scene: asset_server.load("models/archer_tower.glb#Scene0"),
                                 ..Default::default()
+                            })
+                            .with_children(|parent|{
+                                parent.spawn((
+                                    PbrBundle {
+                                        mesh: asset_server.add(Mesh::from(shape::Torus {
+                                            radius: 1.96,
+                                            ring_radius: 0.02,
+                                            ..Default::default()
+                                        })),
+                                        material: asset_server.add(StandardMaterial {
+                                            base_color: Color::rgb(0.8, 0.2, 0.2),
+                                            ..Default::default()
+                                        }),
+                                        transform: Transform::from_xyz(0.0, 0.3, 0.0),
+                                        ..Default::default()
+                                    },
+                                ));
                             })
                             .id(),
                     );

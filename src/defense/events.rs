@@ -118,9 +118,9 @@ pub fn spawn_defense(
                             Defense {
                                 targets: VecDeque::new(),
                                 damage: 0.1,
-                                shooting_timer: Timer::from_seconds(0.3, TimerMode::Repeating),
+                                shooting_timer: Timer::from_seconds(0.2, TimerMode::Repeating),
                             },
-                            Collider::ball(1.5),
+                            Collider::ball(2.0),
                             Sensor,
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
                             Pickable::IGNORE,
