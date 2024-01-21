@@ -90,8 +90,8 @@ pub fn setup_level(
     }
 
     commands.spawn(Level {
-        enemies: 5,
-        separation_timer: Timer::from_seconds(2.2, TimerMode::Repeating),
+        enemies: 15,
+        separation_timer: Timer::from_seconds(2.0, TimerMode::Repeating),
         waypoints,
     });
 
@@ -122,12 +122,12 @@ pub fn spawn_enemies(
             event_writer.send(SpawnEnemyEvent {
                 enemy: Enemy {
                     speed: 0.1,
-                    health: 3,
+                    health: 3.0,
                     score: 10,
                     waypoint: 0,
                 },
                 position: Vec3::new(-8.0, 0.0, -8.0),
-            });            
+            });
         }
     }
 }

@@ -1,13 +1,13 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
 use bevy_mod_picking::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 use super::components::*;
 use super::resources::*;
-use crate::BuildEvent;
 use crate::player::resources::*;
+use crate::BuildEvent;
 
 pub fn spawn_defense(
     mut build_events: EventReader<BuildEvent>,
@@ -43,7 +43,7 @@ pub fn spawn_defense(
                             RigidBody::Dynamic,
                             Defense {
                                 targets: VecDeque::new(),
-                                damage: 5,
+                                damage: 0.5,
                                 shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
                             },
                             Collider::ball(3.0),
@@ -55,7 +55,6 @@ pub fn spawn_defense(
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
-                                PickableBundle::default(),
                             ));
                             parent.spawn((
                                 SceneBundle {
@@ -81,7 +80,7 @@ pub fn spawn_defense(
                             RigidBody::Dynamic,
                             Defense {
                                 targets: VecDeque::new(),
-                                damage: 3,
+                                damage: 0.3,
                                 shooting_timer: Timer::from_seconds(0.5, TimerMode::Repeating),
                             },
                             Collider::ball(3.0),
@@ -93,7 +92,6 @@ pub fn spawn_defense(
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
-                                PickableBundle::default(),
                             ));
                             parent.spawn((
                                 SceneBundle {
@@ -119,7 +117,7 @@ pub fn spawn_defense(
                             RigidBody::Dynamic,
                             Defense {
                                 targets: VecDeque::new(),
-                                damage: 1,
+                                damage: 0.1,
                                 shooting_timer: Timer::from_seconds(0.3, TimerMode::Repeating),
                             },
                             Collider::ball(1.5),
@@ -131,7 +129,6 @@ pub fn spawn_defense(
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
-                                PickableBundle::default(),
                             ));
                             parent.spawn((Weapon::Archer,));
                         });

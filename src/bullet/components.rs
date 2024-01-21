@@ -5,11 +5,15 @@ use bevy::prelude::*;
 pub struct Bullet {
     pub target: Vec3,
     pub speed: f32,
-    pub damage: i32,
+    pub damage: f32,
 }
 
 impl Bullet {
-    pub fn new(target: Vec3, speed: f32, damage: i32) -> Self {
-        Bullet { target, speed, damage}
+    pub fn new(target: Vec3, speed: f32, damage: f32) -> Self {
+        Bullet {
+            target,
+            speed,
+            damage,
+        }
     }
 }

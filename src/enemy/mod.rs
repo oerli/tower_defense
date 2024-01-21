@@ -2,13 +2,13 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 pub mod components;
+pub mod events;
 mod resources;
 mod systems;
-pub mod events;
 
+use events::*;
 use resources::*;
 use systems::*;
-use events::*;
 
 use crate::GameState;
 
@@ -25,6 +25,7 @@ impl Plugin for EnemyPlugin {
             .add_systems(Update, spawn_enemy.run_if(on_event::<SpawnEnemyEvent>()))
             // Systems
             .add_systems(Update, enemy_destroyed.run_if(in_state(GameState::Playing)))
-            .add_systems(Update, enemy_movement.run_if(in_state(GameState::Playing)));
+            .add_systems(Update, enemy_movement.run_if(in_state(GameState::Playing)))
+            .add_systems(Update, despawn_enemy);
     }
 }

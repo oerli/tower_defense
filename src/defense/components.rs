@@ -6,7 +6,7 @@ use bevy::prelude::*;
 #[reflect(Component)]
 pub struct Defense {
     pub targets: VecDeque<Entity>,
-    pub damage: i32,
+    pub damage: f32,
     pub shooting_timer: Timer,
 }
 
