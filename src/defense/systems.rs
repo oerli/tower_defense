@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
@@ -66,24 +68,13 @@ pub fn defense_shooting(
 }
 
 pub fn weapon_rotation(
-    mut weapon_query: Query<(&Parent, &mut Transform), With<Weapon>>,
-    defense_query: Query<&Defense>,
-    enemy_query: Query<&GlobalTransform, With<Enemy>>,
+    mut defense_query: Query<&mut Transform, With<Defense>>,
 ) {
-    for (defense_entity, mut transform) in weapon_query.iter_mut() {
-        if let Ok(defense) = defense_query.get(defense_entity.get()) {
-            if let Some(target) = defense.targets.front() {
-                if let Ok(enemy_transform) = enemy_query.get(*target) {
-                    // transform.look_at(enemy_transform.translation(), Vec3::Y);
-
-                    let direction = enemy_transform.translation() - transform.translation;
-                    let angle = direction.y.atan2(direction.x);
-                    let rotation = Quat::from_rotation_y(angle);
-
-                    transform.rotation = rotation;
-
-                }
-            }
-        }
+    for mut transform in defense_query.iter_mut() {
+        let target_position = Vec3::new(0.0, 0.0, 0.0);
+        let direction = target_position - transform.translation;
+        // add PI for a 180 degree rotation
+        let rotation_angle = direction.x.atan2(direction.z) + PI;
+        transform.rotation = Quat::from_rotation_y(rotation_angle);
     }
 }
