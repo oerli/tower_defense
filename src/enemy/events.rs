@@ -1,17 +1,16 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::{bullet::components::Bullet, defense::components::Defense, enemy::components::Enemy};
-
-use super::components::*;
+use crate::bullet::components::*;
+use crate::defense::components::*;
+use crate::enemy::components::*;
 
 // TODO: check if there is a better way to check types
 pub fn enemy_contact(
     mut collision_events: EventReader<CollisionEvent>,
     mut commands: Commands,
     mut defense_query: Query<&mut Defense>,
-    mut enemy_query: Query<(&mut Enemy, &Children)>,
-    health_query: Query<&EnemyHealth>,
+    mut enemy_query: Query<&mut Enemy>,
     bullet_query: Query<&Bullet>,
 ) {
     for collision_event in collision_events.read() {
@@ -19,19 +18,9 @@ pub fn enemy_contact(
             CollisionEvent::Started(entity1, entity2, _flags) => {
                 // bullet hit enemy
                 bullet_query.get(*entity1).ok().map(|bullet| {
-                    enemy_query
-                        .get_mut(*entity2)
-                        .ok()
-                        .map(|(mut enemy, children)| {
-                            enemy.health -= bullet.damage;
-                            for child in children.iter() {
-                                // despawn one health bar indicator
-                                if let Ok(_health) = health_query.get(*child) {
-                                    commands.entity(*child).despawn_recursive();
-                                    break;
-                                }
-                            }
-                        });
+                    enemy_query.get_mut(*entity2).ok().map(|mut enemy| {
+                        enemy.health -= bullet.damage;
+                    });
 
                     commands.entity(*entity1).despawn_recursive();
                 });
@@ -45,19 +34,9 @@ pub fn enemy_contact(
 
                 // bullet hit enemy
                 bullet_query.get(*entity2).ok().map(|bullet| {
-                    enemy_query
-                        .get_mut(*entity1)
-                        .ok()
-                        .map(|(mut enemy, children)| {
-                            enemy.health -= bullet.damage;
-                            for child in children.iter() {
-                                // despawn one health bar indicator
-                                if let Ok(_health) = health_query.get(*child) {
-                                    commands.entity(*child).despawn_recursive();
-                                    break;
-                                }
-                            }
-                        });
+                    enemy_query.get_mut(*entity1).ok().map(|mut enemy| {
+                        enemy.health -= bullet.damage;
+                    });
 
                     commands.entity(*entity2).despawn_recursive();
                 });
@@ -98,25 +77,24 @@ pub fn spawn_enemy(
     asset_server: Res<AssetServer>,
 ) {
     for event in enemy_events.read() {
-        commands
-            .spawn((
-                SceneBundle {
-                    scene: asset_server.load("models/orc.glb#Scene0"),
-                    transform: Transform::from_translation(event.position),
-                    ..Default::default()
-                },
-                RigidBody::Dynamic,
-                Collider::cuboid(0.5, 0.5, 0.5),
-                Velocity {
-                    linvel: Vec3::new(0.0, 0.0, 0.0),
-                    angvel: Vec3::new(0.0, 0.0, 0.0),
-                },
-                ActiveEvents::COLLISION_EVENTS,
-                CollisionGroups::new(
-                    Group::GROUP_3,
-                    Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
-                ),
-                event.enemy.clone(),
-            ));
+        commands.spawn((
+            SceneBundle {
+                scene: asset_server.load("models/orc.glb#Scene0"),
+                transform: Transform::from_translation(event.position),
+                ..Default::default()
+            },
+            RigidBody::Dynamic,
+            Collider::cuboid(0.5, 0.5, 0.5),
+            Velocity {
+                linvel: Vec3::new(0.0, 0.0, 0.0),
+                angvel: Vec3::new(0.0, 0.0, 0.0),
+            },
+            ActiveEvents::COLLISION_EVENTS,
+            CollisionGroups::new(
+                Group::GROUP_3,
+                Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
+            ),
+            event.enemy.clone(),
+        ));
     }
 }

@@ -76,6 +76,7 @@ pub fn enemy_destroyed(
     animations: Res<Animations>,
     children: Query<&Children>,
     mut collision_group_query: Query<&mut CollisionGroups>,
+    enemy_health_query: Query<&EnemyHealth>,
 ) {
     for (entity, enemy) in query.iter() {
         if enemy.health <= 0.0 {
@@ -88,6 +89,10 @@ pub fn enemy_destroyed(
                         animations.0[1].clone_weak(),
                         Duration::from_millis(250),
                     );
+                }
+                // despwan enemy helath bars, workaround if there are still health bars left
+                if let Ok(_enemy_health) = enemy_health_query.get(entity) {
+                    commands.entity(entity).despawn_recursive();
                 }
             }
 
@@ -124,12 +129,13 @@ pub fn enemy_health(
     asset_server: Res<AssetServer>,
 ) {
     for (entity, enemy, children) in enemy_query.iter() {
+        // keep track of how many health bars are spawned
         let mut health_count = 0;
         for child in children.iter() {
             if let Ok(_enemy_health) = enemy_health_query.get(*child) {
                 health_count += 1;
 
-                if (enemy.health as i32) < health_count {
+                if (enemy.health as i32) + 1 < health_count {
                     commands.entity(*child).despawn_recursive();
                 }
             }
