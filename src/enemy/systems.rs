@@ -116,3 +116,54 @@ pub fn despawn_enemy(
         }
     }
 }
+
+pub fn enemy_health(
+    mut commands: Commands,
+    enemy_query: Query<(Entity, &Enemy, &Children)>,
+    enemy_health_query: Query<&EnemyHealth>,
+    asset_server: Res<AssetServer>,
+) {
+    for (entity, enemy, children) in enemy_query.iter() {
+        let mut health_count = 0;
+        for child in children.iter() {
+            if let Ok(_enemy_health) = enemy_health_query.get(*child) {
+                health_count += 1;
+
+                if (enemy.health as i32) < health_count {
+                    commands.entity(*child).despawn_recursive();
+                }
+            }
+        }
+
+        commands
+            .get_entity(entity)
+            .unwrap()
+            .with_children(|parent| {
+                for health in 1..enemy.health as i32 + 1 - health_count {
+                    if health % 2 == 0 {
+                        parent.spawn((
+                            SceneBundle {
+                                scene: asset_server.load("models/health.glb#Scene0"),
+                                transform: Transform::from_xyz(health as f32 * 0.1, 1.0, 0.0),
+                                ..Default::default()
+                            },
+                            EnemyHealth,
+                        ));
+                    } else {
+                        parent.spawn((
+                            SceneBundle {
+                                scene: asset_server.load("models/health.glb#Scene0"),
+                                transform: Transform::from_xyz(
+                                    health as f32 * -0.1 + 0.1,
+                                    1.0,
+                                    0.0,
+                                ),
+                                ..Default::default()
+                            },
+                            EnemyHealth,
+                        ));
+                    }
+                }
+            });
+    }
+}

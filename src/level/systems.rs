@@ -122,7 +122,7 @@ pub fn spawn_enemies(
             event_writer.send(SpawnEnemyEvent {
                 enemy: Enemy {
                     speed: 0.1,
-                    health: 3.0,
+                    health: 3.9,
                     score: 10,
                     waypoint: 0,
                 },

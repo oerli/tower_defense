@@ -26,6 +26,7 @@ impl Plugin for EnemyPlugin {
             // Systems
             .add_systems(Update, enemy_destroyed.run_if(in_state(GameState::Playing)))
             .add_systems(Update, enemy_movement.run_if(in_state(GameState::Playing)))
-            .add_systems(Update, despawn_enemy);
+            .add_systems(Update, despawn_enemy)
+            .add_systems(Update, enemy_health);
     }
 }

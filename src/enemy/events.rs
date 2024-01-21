@@ -117,33 +117,6 @@ pub fn spawn_enemy(
                     Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
                 ),
                 event.enemy.clone(),
-            ))
-            .with_children(|parent| {
-                for health in 1..event.enemy.health as i32 + 1 {
-                    if health % 2 == 0 {
-                        parent.spawn((
-                            SceneBundle {
-                                scene: asset_server.load("models/health.glb#Scene0"),
-                                transform: Transform::from_xyz(health as f32 * 0.1, 1.0, 0.0),
-                                ..Default::default()
-                            },
-                            EnemyHealth,
-                        ));
-                    } else {
-                        parent.spawn((
-                            SceneBundle {
-                                scene: asset_server.load("models/health.glb#Scene0"),
-                                transform: Transform::from_xyz(
-                                    health as f32 * -0.1 + 0.1,
-                                    1.0,
-                                    0.0,
-                                ),
-                                ..Default::default()
-                            },
-                            EnemyHealth,
-                        ));
-                    }
-                }
-            });
+            ));
     }
 }
