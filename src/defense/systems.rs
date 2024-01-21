@@ -68,13 +68,18 @@ pub fn defense_shooting(
 }
 
 pub fn weapon_rotation(
-    mut defense_query: Query<&mut Transform, With<Defense>>,
+    mut defense_query: Query<(&mut Transform, &Defense)>,
+    enemy_query: Query<&GlobalTransform, With<Enemy>>
 ) {
-    for mut transform in defense_query.iter_mut() {
-        let target_position = Vec3::new(0.0, 0.0, 0.0);
-        let direction = target_position - transform.translation;
-        // add PI for a 180 degree rotation
-        let rotation_angle = direction.x.atan2(direction.z) + PI;
-        transform.rotation = Quat::from_rotation_y(rotation_angle);
+    for (mut transform, defense) in defense_query.iter_mut() {
+        if let Some(target) = defense.targets.front() {
+            if let Ok(enemy) = enemy_query.get(*target) {
+                let direction = enemy.translation() - transform.translation;
+                // add PI for a 180 degree rotation
+                let rotation_angle = direction.x.atan2(direction.z) + PI;
+                transform.rotation = Quat::from_rotation_y(rotation_angle);
+            }
+        }
+
     }
 }
