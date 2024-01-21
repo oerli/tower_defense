@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::transform::commands;
 use bevy_egui::{egui, EguiContexts};
 
 use crate::defense::components::*;
@@ -18,14 +17,10 @@ pub fn tower_selection(
     let archer_tower_image = contexts.add_image(asset_server.load("images/archer_tower.png"));
 
     egui::Window::new("Select Tower")
-        // .vscroll(false)
-        // .default_width(160.0)
         .resizable(false)
         .collapsible(false)
         .title_bar(false)
         .default_pos([140.0, 140.0])
-        // .pivot(egui::Align2::CENTER_CENTER)
-        // .open(&mut ui_state.is_window_open)
         .show(contexts.ctx_mut(), |ui| {
             egui::Grid::new("selection").striped(true).show(ui, |ui| {
                 if ui
@@ -37,7 +32,7 @@ pub fn tower_selection(
                 {
                     defense_selection.selected = Weapon::Cannon;
 
-                    // create tower for hover events
+                    // create cannon tower for hover events
                     if hover_handler.entity.is_some() {
                         commands.entity(hover_handler.entity.unwrap()).despawn_recursive();
                     }
@@ -78,7 +73,7 @@ pub fn tower_selection(
                 {
                     defense_selection.selected = Weapon::Ballista;
 
-                    // create tower for hover events
+                    // create ballista tower for hover events
                     if hover_handler.entity.is_some() {
                         commands.entity(hover_handler.entity.unwrap()).despawn_recursive();
                     }
@@ -119,7 +114,7 @@ pub fn tower_selection(
                 {
                     defense_selection.selected = Weapon::Archer;
 
-                    // create tower for hover events
+                    // create archer tower for hover events
                     if hover_handler.entity.is_some() {
                         commands.entity(hover_handler.entity.unwrap()).despawn_recursive();
                     }
