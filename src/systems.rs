@@ -85,6 +85,8 @@ pub fn setup_physics(mut commands: Commands, asset_server: Res<AssetServer>) {
                     Collider::cuboid(0.50, 0.2, 0.5),
                     CollisionGroups::new(Group::GROUP_5, Group::GROUP_5),
                     On::<Pointer<Click>>::send_event::<BuildEvent>(),
+                    On::<Pointer<Over>>::send_event::<OverEvent>(),
+                    // On::<Pointer<Out>>::send_event::<OutEvent>(),
                     Tile,
                 ))
                 .with_children(|parent| {

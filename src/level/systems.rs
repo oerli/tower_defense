@@ -56,6 +56,7 @@ pub fn setup_level(
         for position in waypoints.iter() {
             if transform.translation.x == position.x && transform.translation.z == position.z {
                 commands.entity(entity).remove::<On<Pointer<Click>>>();
+                commands.entity(entity).remove::<On<Pointer<Over>>>();
                 commands.entity(entity).remove::<SceneBundle>();
 
                 // remove possible decorations

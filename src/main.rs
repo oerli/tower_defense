@@ -18,6 +18,7 @@ mod level;
 mod menu;
 
 use events::*;
+use resources::*;
 use systems::*;
 
 use bullet::BulletPlugin;
@@ -43,8 +44,14 @@ fn main() {
         .add_plugins(BulletPlugin)
         .add_plugins(LevelPlugin)
         .add_plugins(MenuPlugin)
+        // Resources
+        .init_resource::<HoverHandler>()
         // Events
         .add_event::<BuildEvent>()
+        .add_event::<OverEvent>()
+        // .add_event::<OutEvent>()
+        .add_systems(Update, hover_event.run_if(on_event::<OverEvent>()))
+        // .add_systems(Update, out_event.run_if(on_event::<OutEvent>()))
         // State
         .add_state::<GameState>()
         // Systems
