@@ -11,4 +11,8 @@ pub struct Defense {
 }
 
 #[derive(Component)]
-pub struct Weapon;
+pub enum Weapon {
+    Cannon,
+    Ballista,
+    Archer,
+}
