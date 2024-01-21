@@ -96,7 +96,7 @@ pub fn spawn_defense(
                             parent.spawn((
                                 SceneBundle {
                                     scene: asset_server.load("models/ballista.glb#Scene0"),
-                                    transform: Transform::from_xyz(0.0, 0.68, 0.0),
+                                    transform: Transform::from_xyz(0.0, 0.83, 0.0),
                                     ..Default::default()
                                 },
                                 Weapon::Ballista,
