@@ -63,7 +63,6 @@ pub fn tower_selection(
                             .id(),
                     );
 
-                    info!("Tower 1 selected");
                     next_game_state.set(GameState::Playing);
                 }
 
@@ -105,7 +104,6 @@ pub fn tower_selection(
                             .id(),
                     );
 
-                    info!("Tower 2 selected");
                     next_game_state.set(GameState::Playing);
                 }
 
@@ -148,15 +146,14 @@ pub fn tower_selection(
                             .id(),
                     );
 
-                    info!("Tower 3 selected");
                     next_game_state.set(GameState::Playing);
                 }
 
                 ui.end_row();
 
-                ui.label("Tower 1 description");
-                ui.label("Tower 2 description");
-                ui.label("Tower 3 description");
+                ui.label("Cannon Tower\nCredits: 10\nRange: 3, Frequency: 1s, Damage: 0.5");
+                ui.label("Ballista Tower\nCredits: 10\nRange: 3, Frequency: 0.5s, Damage: 0.3");
+                ui.label("Archer Tower\nCredits: 10\nRange: 3, Frequency: 0.2s, Damage: 0.1");
 
                 ui.end_row();
             });

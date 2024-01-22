@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 
+use crate::player::resources::*;
+
 use super::resources::*;
 
 #[derive(Event)]
@@ -33,14 +35,21 @@ impl From<ListenerInput<Pointer<Over>>> for OverEvent {
 
 pub fn hover_event(
     mut hover_events: EventReader<OverEvent>,
-    hover_handler: ResMut<HoverHandler>,
+    mut hover_handler: ResMut<HoverHandler>,
     transform_query: Query<&GlobalTransform>,
     mut transform: Query<&mut Transform>,
     mut visibility_query: Query<&mut Visibility>,
+    player: Res<Player>,
+    mut commands: Commands,
 ) {
     for event in hover_events.read() {
         match hover_handler.entity {
             Some(entity) => {
+                // despawn hover tower and set hover handler to none
+                if player.credits < 10 {
+                    hover_handler.entity = None;
+                    commands.entity(entity).despawn_recursive();
+                }
                 transform.get_mut(entity).unwrap().translation =
                     transform_query.get(event.entity).unwrap().translation()
                         + Vec3::new(0.0, 0.1, 0.0);
