@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
+use crate::GameState;
 use crate::defense::components::*;
 use crate::defense::resources::*;
 use crate::HoverHandler;
@@ -11,6 +12,7 @@ pub fn tower_selection(
     mut defense_selection: ResMut<DefenseSelection>,
     mut hover_handler: ResMut<HoverHandler>,
     mut commands: Commands,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     let canon_tower_image = contexts.add_image(asset_server.load("images/canon_tower.png"));
     let ballista_tower_image = contexts.add_image(asset_server.load("images/ballista_tower.png"));
@@ -62,6 +64,7 @@ pub fn tower_selection(
                     );
 
                     info!("Tower 1 selected");
+                    next_game_state.set(GameState::Playing);
                 }
 
                 if ui
@@ -103,6 +106,7 @@ pub fn tower_selection(
                     );
 
                     info!("Tower 2 selected");
+                    next_game_state.set(GameState::Playing);
                 }
 
                 if ui
@@ -145,6 +149,7 @@ pub fn tower_selection(
                     );
 
                     info!("Tower 3 selected");
+                    next_game_state.set(GameState::Playing);
                 }
 
                 ui.end_row();

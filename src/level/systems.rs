@@ -90,10 +90,40 @@ pub fn setup_level(
         }
     }
 
-    commands.spawn(Level {
-        enemies: 15,
-        separation_timer: Timer::from_seconds(2.0, TimerMode::Repeating),
-        waypoints,
+    commands.spawn(Level { waypoints }).with_children(|parent| {
+        parent.spawn(Round {
+            index: 0,
+            enemy: Enemy {
+                speed: 0.1,
+                health: 1.5,
+                score: 10,
+                waypoint: 0,
+            },
+            enemy_count: 5,
+            separation_timer: Timer::from_seconds(3.0, TimerMode::Repeating),
+        });
+        parent.spawn(Round {
+            index: 1,
+            enemy: Enemy {
+                speed: 0.1,
+                health: 2.0,
+                score: 10,
+                waypoint: 0,
+            },
+            enemy_count: 5,
+            separation_timer: Timer::from_seconds(2.0, TimerMode::Repeating),
+        });
+        parent.spawn(Round {
+            index: 2,
+            enemy: Enemy {
+                speed: 0.1,
+                health: 2.0,
+                score: 10,
+                waypoint: 0,
+            },
+            enemy_count: 5,
+            separation_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+        });
     });
 
     commands.insert_resource(Animations(vec![
@@ -107,28 +137,34 @@ pub fn setup_level(
 }
 
 pub fn spawn_enemies(
-    mut query: Query<&mut Level>,
+    // mut query_level: Query<&mut Level>,
+    mut query: Query<(Entity, &mut Round)>,
     time: Res<Time>,
     mut event_writer: EventWriter<SpawnEnemyEvent>,
+    mut commands: Commands,
 ) {
-    for mut level in query.iter_mut() {
-        if level.enemies <= 0 {
-            continue;
+    // sort rounds by index
+    let mut round_entities = query.iter_mut().collect::<Vec<_>>();
+
+    round_entities.sort_by_key(|(_, round)| round.index);
+
+    for (entity, mut round) in round_entities {
+        round.separation_timer.tick(time.delta());
+
+        if round.separation_timer.finished() {
+            // if round is finished remove it otherwise spawn an enemy
+            if round.enemy_count <= 0 {
+                commands.entity(entity).despawn();
+            } else {
+                round.enemy_count -= 1;
+                event_writer.send(SpawnEnemyEvent {
+                    enemy: round.enemy.clone(),
+                    position: Vec3::new(-8.0, 0.0, -8.0),
+                });
+            }
         }
 
-        level.separation_timer.tick(time.delta());
-
-        if level.separation_timer.finished() {
-            level.enemies -= 1;
-            event_writer.send(SpawnEnemyEvent {
-                enemy: Enemy {
-                    speed: 0.1,
-                    health: 4.0,
-                    score: 10,
-                    waypoint: 0,
-                },
-                position: Vec3::new(-8.0, 0.0, -8.0),
-            });
-        }
+        // single query only for first in list
+        break;
     }
 }
