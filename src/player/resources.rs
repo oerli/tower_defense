@@ -6,6 +6,7 @@ pub struct Player {
     pub lives: i32,
     pub score: i32,
     pub level: i32,
+    pub credits: i32,
 }
 
 impl Default for Player {
@@ -13,8 +14,9 @@ impl Default for Player {
         Player {
             name: "Player".to_string(),
             lives: 10,
-            score: 30,
+            score: 0,
             level: 1,
+            credits: 10,
         }
-    }   
+    }
 }

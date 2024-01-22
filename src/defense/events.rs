@@ -30,10 +30,10 @@ pub fn spawn_defense(
         }
 
         // check if the player has enough money
-        if player.score < 10 {
+        if player.credits < 10 {
             continue;
         } else {
-            player.score -= 10;
+            player.credits -= 10;
         }
 
         match defense_selection.selected {

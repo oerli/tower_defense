@@ -6,7 +6,9 @@ use rand::Rng;
 use crate::components::*;
 use crate::enemy::components::*;
 use crate::enemy::events::*;
+use crate::player::resources::*;
 use crate::resources::*;
+use crate::GameState;
 
 use super::components::*;
 
@@ -142,11 +144,15 @@ pub fn spawn_enemies(
     time: Res<Time>,
     mut event_writer: EventWriter<SpawnEnemyEvent>,
     mut commands: Commands,
+    mut player: ResMut<Player>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     // sort rounds by index
     let mut round_entities = query.iter_mut().collect::<Vec<_>>();
 
     round_entities.sort_by_key(|(_, round)| round.index);
+
+    let round_entries = round_entities.len();
 
     for (entity, mut round) in round_entities {
         round.separation_timer.tick(time.delta());
@@ -154,7 +160,16 @@ pub fn spawn_enemies(
         if round.separation_timer.finished() {
             // if round is finished remove it otherwise spawn an enemy
             if round.enemy_count <= 0 {
+                // give player some credits, but not if it's the last round
+                if round_entries > 1 {
+                    player.credits += 10;
+
+                    // show menu to choose from tower for next round
+                    next_game_state.set(GameState::Paused);
+                }
+
                 commands.entity(entity).despawn();
+                
             } else {
                 round.enemy_count -= 1;
                 event_writer.send(SpawnEnemyEvent {

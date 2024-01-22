@@ -55,6 +55,8 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
             TextSection::new(format!("{}", player.lives), TextStyle::default()),
             TextSection::new(" Score: ", TextStyle::default()),
             TextSection::new(format!("{}", player.score), TextStyle::default()),
+            TextSection::new(" Credits: ", TextStyle::default()),
+            TextSection::new(format!("{}", player.credits), TextStyle::default()),
         ]),
         PlayerText,
     ));
@@ -117,6 +119,7 @@ pub fn update_text(mut query: Query<&mut Text, With<PlayerText>>, player: Res<Pl
         text.sections[1].value = format!("{}", player.level);
         text.sections[3].value = format!("{}", player.lives);
         text.sections[5].value = format!("{}", player.score);
+        text.sections[7].value = format!("{}", player.credits);
     }
 }
 
