@@ -23,7 +23,6 @@ impl Plugin for DefensePlugin {
                 Update,
                 defense_shooting.run_if(in_state(GameState::Playing)),
             )
-            .add_systems(Update, weapon_rotation.run_if(in_state(GameState::Playing)))
             .add_systems(Update, spawn_defense.run_if(on_event::<BuildEvent>()));
     }
 }

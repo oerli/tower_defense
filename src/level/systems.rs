@@ -98,7 +98,7 @@ pub fn setup_level(
             enemy: Enemy {
                 speed: 0.1,
                 health: 1.5,
-                score: 10,
+                score: 5,
                 waypoint: 0,
             },
             enemy_count: 5,
@@ -120,7 +120,7 @@ pub fn setup_level(
             enemy: Enemy {
                 speed: 0.1,
                 health: 2.0,
-                score: 10,
+                score: 15,
                 waypoint: 0,
             },
             enemy_count: 5,
@@ -169,7 +169,6 @@ pub fn spawn_enemies(
                 }
 
                 commands.entity(entity).despawn();
-                
             } else {
                 round.enemy_count -= 1;
                 event_writer.send(SpawnEnemyEvent {

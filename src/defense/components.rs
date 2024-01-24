@@ -1,11 +1,8 @@
-use std::collections::VecDeque;
-
 use bevy::prelude::*;
 
-#[derive(Reflect, Component, Default)]
+#[derive(Reflect, Component, Default, Debug)]
 #[reflect(Component)]
 pub struct Defense {
-    pub targets: VecDeque<Entity>,
     pub damage: f32,
     pub shooting_timer: Timer,
 }

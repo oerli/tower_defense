@@ -1,14 +1,12 @@
-use std::collections::VecDeque;
-
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use super::components::*;
 use super::resources::*;
-use crate::GameState;
 use crate::player::resources::*;
 use crate::BuildEvent;
+use crate::GameState;
 
 pub fn spawn_defense(
     mut build_events: EventReader<BuildEvent>,
@@ -49,7 +47,7 @@ pub fn spawn_defense(
                             },
                             RigidBody::Dynamic,
                             Defense {
-                                targets: VecDeque::new(),
+                                // targets: VecDeque::new(),
                                 damage: 0.5,
                                 shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
                             },
@@ -86,7 +84,7 @@ pub fn spawn_defense(
                             },
                             RigidBody::Dynamic,
                             Defense {
-                                targets: VecDeque::new(),
+                                // targets: VecDeque::new(),
                                 damage: 0.3,
                                 shooting_timer: Timer::from_seconds(0.5, TimerMode::Repeating),
                             },
@@ -123,7 +121,7 @@ pub fn spawn_defense(
                             },
                             RigidBody::Dynamic,
                             Defense {
-                                targets: VecDeque::new(),
+                                // targets: VecDeque::new(),
                                 damage: 0.1,
                                 shooting_timer: Timer::from_seconds(0.2, TimerMode::Repeating),
                             },

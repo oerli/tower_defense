@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
 
 pub mod components;
 pub mod events;
@@ -21,7 +20,6 @@ impl Plugin for EnemyPlugin {
             .init_resource::<EnemyPath>()
             // Events
             .add_event::<SpawnEnemyEvent>()
-            .add_systems(Update, enemy_contact.run_if(on_event::<CollisionEvent>()))
             .add_systems(Update, spawn_enemy.run_if(on_event::<SpawnEnemyEvent>()))
             // Systems
             .add_systems(Update, enemy_destroyed.run_if(in_state(GameState::Playing)))
