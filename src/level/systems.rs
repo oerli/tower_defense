@@ -11,131 +11,103 @@ use crate::resources::*;
 use crate::GameState;
 
 use super::components::*;
+use super::resources::*;
 
 pub fn setup_level(
     mut commands: Commands,
     query_tiles: Query<(Entity, &Transform), With<Tile>>,
     query_children: Query<&Children>,
     asset_server: Res<AssetServer>,
+    level: Res<LevelHandle>,
+    mut levels: ResMut<Assets<Level>>,
 ) {
-    let waypoints = vec![
-        Vec3::new(-8.0, 0.0, -8.0),
-        Vec3::new(-7.0, 0.0, -8.0),
-        Vec3::new(-6.0, 0.0, -8.0),
-        Vec3::new(-5.0, 0.0, -8.0),
-        Vec3::new(-4.0, 0.0, -8.0),
-        Vec3::new(-4.0, 0.0, -7.0),
-        Vec3::new(-4.0, 0.0, -6.0),
-        Vec3::new(-4.0, 0.0, -5.0),
-        Vec3::new(-4.0, 0.0, -4.0),
-        Vec3::new(-3.0, 0.0, -4.0),
-        Vec3::new(-2.0, 0.0, -4.0),
-        Vec3::new(-1.0, 0.0, -4.0),
-        Vec3::new(0.0, 0.0, -4.0),
-        Vec3::new(0.0, 0.0, -3.0),
-        Vec3::new(0.0, 0.0, -2.0),
-        Vec3::new(0.0, 0.0, -1.0),
-        Vec3::new(0.0, 0.0, 0.0),
-        Vec3::new(1.0, 0.0, 0.0),
-        Vec3::new(2.0, 0.0, 0.0),
-        Vec3::new(3.0, 0.0, 0.0),
-        Vec3::new(4.0, 0.0, 0.0),
-        Vec3::new(4.0, 0.0, 1.0),
-        Vec3::new(4.0, 0.0, 2.0),
-        Vec3::new(4.0, 0.0, 3.0),
-        Vec3::new(4.0, 0.0, 4.0),
-        Vec3::new(5.0, 0.0, 4.0),
-        Vec3::new(6.0, 0.0, 4.0),
-        Vec3::new(7.0, 0.0, 4.0),
-        Vec3::new(7.0, 0.0, 5.0),
-        Vec3::new(7.0, 0.0, 6.0),
-        Vec3::new(7.0, 0.0, 7.0),
-    ];
+    if let Some(level) = levels.remove(level.0.id()) {
 
-    let mut rng = rand::thread_rng();
+        let mut rng = rand::thread_rng();
 
-    for (entity, transform) in query_tiles.iter() {
-        for position in waypoints.iter() {
-            if transform.translation.x == position.x && transform.translation.z == position.z {
-                commands.entity(entity).remove::<On<Pointer<Click>>>();
-                commands.entity(entity).remove::<On<Pointer<Over>>>();
-                commands.entity(entity).remove::<SceneBundle>();
+        for (entity, transform) in query_tiles.iter() {
+            for position in level.waypoints.iter() {
+                if transform.translation.x == position.x && transform.translation.z == position.z {
+                    commands.entity(entity).remove::<On<Pointer<Click>>>();
+                    commands.entity(entity).remove::<On<Pointer<Over>>>();
+                    commands.entity(entity).remove::<SceneBundle>();
 
-                // remove possible decorations
-                match query_children.get(entity) {
-                    Ok(children) => {
-                        for child in children.iter() {
-                            commands.entity(*child).remove::<SceneBundle>();
+                    // remove possible decorations
+                    match query_children.get(entity) {
+                        Ok(children) => {
+                            for child in children.iter() {
+                                commands.entity(*child).remove::<SceneBundle>();
+                            }
                         }
+                        Err(_) => {}
                     }
-                    Err(_) => {}
-                }
 
-                commands
-                    .entity(entity)
-                    .insert(SceneBundle {
-                        scene: asset_server.load("models/path.glb#Scene0"),
-                        transform: Transform::from_xyz(position.x, 0.0, position.z),
-                        ..Default::default()
-                    })
-                    .with_children(|parent| {
-                        // create some dirt on street
-                        if 0.3 > rng.gen() {
-                            parent.spawn(SceneBundle {
-                                scene: asset_server.load("models/dirt.glb#Scene0"),
-                                transform: Transform::from_xyz(0.0, 0.2, 0.0),
-                                ..Default::default()
-                            });
-                        }
-                    });
+                    commands
+                        .entity(entity)
+                        .insert(SceneBundle {
+                            scene: asset_server.load("models/path.glb#Scene0"),
+                            transform: Transform::from_xyz(position.x, 0.0, position.z),
+                            ..Default::default()
+                        })
+                        .with_children(|parent| {
+                            // create some dirt on street
+                            if 0.3 > rng.gen() {
+                                parent.spawn(SceneBundle {
+                                    scene: asset_server.load("models/dirt.glb#Scene0"),
+                                    transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                                    ..Default::default()
+                                });
+                            }
+                        });
+                }
             }
         }
+
+        commands.spawn(Level { waypoints: level.waypoints }).with_children(|parent| {
+            parent.spawn(Round {
+                index: 0,
+                enemy: Enemy {
+                    speed: 0.1,
+                    health: 1.5,
+                    score: 5,
+                    waypoint: 0,
+                },
+                enemy_count: 5,
+                separation_timer: Timer::from_seconds(3.0, TimerMode::Repeating),
+            });
+            parent.spawn(Round {
+                index: 1,
+                enemy: Enemy {
+                    speed: 0.1,
+                    health: 2.0,
+                    score: 10,
+                    waypoint: 0,
+                },
+                enemy_count: 5,
+                separation_timer: Timer::from_seconds(2.0, TimerMode::Repeating),
+            });
+            parent.spawn(Round {
+                index: 2,
+                enemy: Enemy {
+                    speed: 0.1,
+                    health: 2.0,
+                    score: 15,
+                    waypoint: 0,
+                },
+                enemy_count: 5,
+                separation_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+            });
+        });
+
+        commands.insert_resource(Animations(vec![
+            // running animation
+            asset_server.load("models/orc.glb#Animation3"),
+            // dying animation
+            asset_server.load("models/orc.glb#Animation9"),
+            // jumping animation
+            asset_server.load("models/orc.glb#Animation5"),
+        ]));
     }
-
-    commands.spawn(Level { waypoints }).with_children(|parent| {
-        parent.spawn(Round {
-            index: 0,
-            enemy: Enemy {
-                speed: 0.1,
-                health: 1.5,
-                score: 5,
-                waypoint: 0,
-            },
-            enemy_count: 5,
-            separation_timer: Timer::from_seconds(3.0, TimerMode::Repeating),
-        });
-        parent.spawn(Round {
-            index: 1,
-            enemy: Enemy {
-                speed: 0.1,
-                health: 2.0,
-                score: 10,
-                waypoint: 0,
-            },
-            enemy_count: 5,
-            separation_timer: Timer::from_seconds(2.0, TimerMode::Repeating),
-        });
-        parent.spawn(Round {
-            index: 2,
-            enemy: Enemy {
-                speed: 0.1,
-                health: 2.0,
-                score: 15,
-                waypoint: 0,
-            },
-            enemy_count: 5,
-            separation_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
-        });
-    });
-
-    commands.insert_resource(Animations(vec![
-        // running animation
-        asset_server.load("models/orc.glb#Animation3"),
-        // dying animation
-        asset_server.load("models/orc.glb#Animation9"),
-        // jumping animation
-        asset_server.load("models/orc.glb#Animation5"),
-    ]));
 }
 
 pub fn spawn_enemies(
@@ -181,4 +153,9 @@ pub fn spawn_enemies(
         // single query only for first in list
         break;
     }
+}
+
+pub fn load_levels(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let level = LevelHandle(asset_server.load("levels/first.level.toml"));
+    commands.insert_resource(level);
 }

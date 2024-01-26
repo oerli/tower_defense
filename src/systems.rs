@@ -96,7 +96,7 @@ pub fn setup_physics(mut commands: Commands, asset_server: Res<AssetServer>) {
                     if 0.2 > rng.gen() {
                         parent.spawn(SceneBundle {
                             scene: asset_server.load("models/tree.glb#Scene0"),
-                            transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                            transform: Transform::from_xyz(0.0, 0.2, 0.0).with_scale(Vec3::splat(2.0)),
                             ..Default::default()
                         });
                     } else if 0.1 > rng.gen() {

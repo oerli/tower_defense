@@ -1,10 +1,12 @@
 use bevy::prelude::*;
+use bevy::asset::Asset;
+use serde::Deserialize;
+use bevy::reflect::TypePath;
 
 use crate::enemy::components::*;
 
-#[derive(Reflect, Component, Default)]
-#[reflect(Component)]
-pub struct Level {  
+#[derive(Component, Deserialize, Asset, TypePath, Debug)]
+pub struct Level {
     pub waypoints: Vec<Vec3>,
 }
 
