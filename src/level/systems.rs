@@ -68,59 +68,47 @@ pub fn setup_level(
 }
 
 pub fn setup_round(
-    mut commands: Commands,
     query_level: Query<Entity, With<Level>>,
     round: Res<RoundHandle>,
     mut rounds: ResMut<Assets<Round>>,
+    mut current_round: ResMut<CurrentRound>,
 ) {
-    if let Ok(level_entity) = query_level.get_single() {
+    if let Ok(_level_entity) = query_level.get_single() {
         if let Some(round) = rounds.remove(round.0.id()) {
-            commands.entity(level_entity).with_children(|parent| {
-                parent.spawn((
-                    Lifetime {
-                        timer: Timer::from_seconds(
-                            round.separation_time.clone(),
-                            TimerMode::Repeating,
-                        ),
-                    },
-                    round,
-                ));
-            });
+            current_round.timer =
+                Timer::from_seconds(round.separation_time.clone(), TimerMode::Repeating);
+            current_round.round = Some(round);
         }
     }
 }
 
 pub fn spawn_enemies(
-    // mut query_level: Query<&mut Level>,
-    mut query: Query<(Entity, &mut Lifetime, &mut Round)>,
     time: Res<Time>,
     mut event_writer: EventWriter<SpawnEnemyEvent>,
-    mut commands: Commands,
     mut player: ResMut<Player>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    mut current_round: ResMut<CurrentRound>,
+    query_enemy: Query<&Enemy>,
 ) {
-    // sort rounds by index
-    let mut round_entities = query.iter_mut().collect::<Vec<_>>();
+    current_round.timer.tick(time.delta());
 
-    round_entities.sort_by_key(|(_, _, round)| round.index);
+    if current_round.timer.finished() {
+        if let Some(round) = current_round.round.as_mut() {
 
-    let round_entries = round_entities.len();
-
-    for (entity, mut lifetime, mut round) in round_entities {
-        lifetime.timer.tick(time.delta());
-
-        if lifetime.timer.finished() {
             // if round is finished remove it otherwise spawn an enemy
             if round.enemy_count <= 0 {
-                // give player some credits, but not if it's the last round
-                if round_entries > 1 {
+                // check if all enemies are destroyed
+                if query_enemy.iter().count() == 0 {
+                    // give player some credits, but not if it's the last round
                     player.credits += 10;
+
+                    // set index to next round and remove current round
+                    current_round.index += 1;
+                    current_round.round = None;
 
                     // show menu to choose from tower for next round
                     next_game_state.set(GameState::Paused);
                 }
-
-                commands.entity(entity).despawn();
             } else {
                 round.enemy_count -= 1;
                 event_writer.send(SpawnEnemyEvent {
@@ -129,10 +117,7 @@ pub fn spawn_enemies(
                 });
             }
         }
-
-        // single query only for first in list
-        break;
-    }
+    };
 }
 
 pub fn load_levels(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -150,11 +135,18 @@ pub fn load_levels(mut commands: Commands, asset_server: Res<AssetServer>) {
     ]));
 }
 
-pub fn load_rounds(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let round = RoundHandle(asset_server.load("levels/first.round.toml"));
-    commands.insert_resource(round);
-    // let round = RoundHandle(asset_server.load("levels/second.round.toml"));
-    // commands.insert_resource(round);
-    // let round = RoundHandle(asset_server.load("levels/third.round.toml"));
-    // commands.insert_resource(round);
+pub fn load_rounds(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    current_round: Res<CurrentRound>,
+    query_level: Query<&Level>,
+) {
+    if current_round.round.is_none()
+        && current_round.index < query_level.get_single().unwrap().rounds
+    {
+        let round = RoundHandle(
+            asset_server.load(format!("levels/{:02}.round.toml", current_round.index + 1)),
+        );
+        commands.insert_resource(round);
+    }
 }

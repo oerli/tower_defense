@@ -19,11 +19,15 @@ impl Plugin for LevelPlugin {
             // Plugins
             .add_plugins(TomlAssetPlugin::<Level>::new(&["level.toml"]))
             .add_plugins(TomlAssetPlugin::<Round>::new(&["round.toml"]))
+            // Resources
+            .init_resource::<RoundHandle>()
+            .init_resource::<CurrentRound>()
             // Systems
             .add_systems(Startup, load_levels)
-            .add_systems(Startup, load_rounds)
+            .add_systems(Update, load_rounds.run_if(in_state(GameState::Playing)))
             .add_systems(Update, setup_level)
             .add_systems(Update, setup_round)
+            
             .add_systems(Update, spawn_enemies.run_if(in_state(GameState::Playing)));
     }
 }

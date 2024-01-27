@@ -12,3 +12,16 @@ impl Default for RoundHandle {
         RoundHandle(Handle::default())
     }
 }
+
+#[derive(Resource, Default)]
+pub struct CurrentLevel {
+    pub level_index: usize,
+    pub running: bool,
+}
+
+#[derive(Resource, Default)]
+pub struct CurrentRound {
+    pub round: Option<Round>,
+    pub index: usize,
+    pub timer: Timer,
+}

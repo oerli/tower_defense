@@ -1,4 +1,3 @@
-index = 0
 separation_time = 3.0
 enemy.speed = 0.1
 enemy.health = 1.5
