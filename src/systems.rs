@@ -3,11 +3,9 @@ use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::PanOrbitCamera;
 use bevy_rapier3d::prelude::*;
 
-use rand::Rng;
-
 use crate::player::resources::*;
 use crate::GameState;
-use crate::{components::*, events::*, resources::*};
+use crate::resources::*;
 
 pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // add light
@@ -69,46 +67,7 @@ pub fn setup_physics(mut commands: Commands, asset_server: Res<AssetServer>) {
         CollisionGroups::new(Group::GROUP_4, Group::all()),
         TransformBundle::from(Transform::from_xyz(-0.5, -0.6, -0.5)),
         Pickable::IGNORE,
-    ));
-
-    let mut rng = rand::thread_rng();
-
-    // create tiles
-    for x in -8..8 {
-        for y in -8..8 {
-            commands
-                .spawn((
-                    SceneBundle {
-                        scene: asset_server.load("models/tile.glb#Scene0"),
-                        transform: Transform::from_xyz(x as f32, 0.0, y as f32),
-                        ..Default::default()
-                    },
-                    PickableBundle::default(),
-                    Collider::cuboid(0.50, 0.2, 0.5),
-                    CollisionGroups::new(Group::GROUP_5, Group::GROUP_5),
-                    On::<Pointer<Click>>::send_event::<BuildEvent>(),
-                    On::<Pointer<Over>>::send_event::<OverEvent>(),
-                    // On::<Pointer<Out>>::send_event::<OutEvent>(),
-                    Tile,
-                ))
-                .with_children(|parent| {
-                    // create some trees or rocks
-                    if 0.2 > rng.gen() {
-                        parent.spawn(SceneBundle {
-                            scene: asset_server.load("models/tree.glb#Scene0"),
-                            transform: Transform::from_xyz(0.0, 0.2, 0.0).with_scale(Vec3::splat(2.0)),
-                            ..Default::default()
-                        });
-                    } else if 0.1 > rng.gen() {
-                        parent.spawn(SceneBundle {
-                            scene: asset_server.load("models/rocks.glb#Scene0"),
-                            transform: Transform::from_xyz(0.0, 0.2, 0.0),
-                            ..Default::default()
-                        });
-                    }
-                });
-        }
-    }
+    ));    
 }
 
 #[derive(Component)]

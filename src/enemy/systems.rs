@@ -5,7 +5,7 @@ use bevy::animation::RepeatAnimation;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::level::components::*;
+use crate::level::resources::*;
 use crate::player::resources::*;
 use crate::resources::*;
 
@@ -21,49 +21,49 @@ pub fn enemy_movement(
         &GlobalTransform,
         &mut Transform,
     )>,
-    query_level: Query<&Level>,
+    current_level: Res<CurrentLevel>,
     mut player: ResMut<Player>,
     mut animation_players: Query<&mut AnimationPlayer>,
     animations: Res<Animations>,
     children: Query<&Children>,
 ) {
-    let level = query_level.get_single().unwrap();
+    if let Some(level) = &current_level.level {
+        for (entity, mut enemy, mut velocity, position, mut transform) in query.iter_mut() {
+            if enemy.waypoint < level.waypoints.len() && enemy.health > 0.0 {
+                transform.look_at(level.waypoints[enemy.waypoint], Vec3::ZERO);
+                // TODO: dirty hack to rotate the enemy 180 degrees
+                transform.rotate(Quat::from_rotation_y(PI));
 
-    for (entity, mut enemy, mut velocity, position, mut transform) in query.iter_mut() {
-        if enemy.waypoint < level.waypoints.len() && enemy.health > 0.0 {
-            transform.look_at(level.waypoints[enemy.waypoint], Vec3::ZERO);
-            // TODO: dirty hack to rotate the enemy 180 degrees
-            transform.rotate(Quat::from_rotation_y(PI));
+                let mut direction = level.waypoints[enemy.waypoint] - position.translation();
+                direction.y = 0.0;
+                let distance = direction.length();
 
-            let mut direction = level.waypoints[enemy.waypoint] - position.translation();
-            direction.y = 0.0;
-            let distance = direction.length();
-
-            if distance < 0.5 {
-                enemy.waypoint += 1;
-            } else {
-                direction = direction.normalize();
-                velocity.linvel += direction * enemy.speed;
-            }
-        } else if enemy.health > 0.0 {
-            // enemy reached goal
-            player.lives -= 1;
-
-            for entity in children.iter_descendants(entity) {
-                if let Ok(mut animation_player) = animation_players.get_mut(entity) {
-                    animation_player
-                        .play_with_transition(
-                            animations.0[2].clone_weak(),
-                            Duration::from_millis(250),
-                        )
-                        .set_repeat(RepeatAnimation::Count(8));
+                if distance < 0.5 {
+                    enemy.waypoint += 1;
+                } else {
+                    direction = direction.normalize();
+                    velocity.linvel += direction * enemy.speed;
                 }
+            } else if enemy.health > 0.0 {
+                // enemy reached goal
+                player.lives -= 1;
+
+                for entity in children.iter_descendants(entity) {
+                    if let Ok(mut animation_player) = animation_players.get_mut(entity) {
+                        animation_player
+                            .play_with_transition(
+                                animations.0[2].clone_weak(),
+                                Duration::from_millis(250),
+                            )
+                            .set_repeat(RepeatAnimation::Count(8));
+                    }
+                }
+                commands.entity(entity).remove::<Enemy>();
+                // despawn the enemy after 3 seconds
+                commands.entity(entity).insert(DespawnTimer {
+                    timer: Timer::from_seconds(3.0, TimerMode::Once),
+                });
             }
-            commands.entity(entity).remove::<Enemy>();
-            // despawn the enemy after 3 seconds
-            commands.entity(entity).insert(DespawnTimer {
-                timer: Timer::from_seconds(3.0, TimerMode::Once),
-            });
         }
     }
 }

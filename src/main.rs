@@ -5,7 +5,7 @@ use bevy_rapier3d::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_egui::EguiPlugin;
 
-mod events;
+pub mod events;
 mod systems;
 mod components;
 mod resources;

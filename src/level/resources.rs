@@ -1,22 +1,16 @@
 use bevy::prelude::*;
 use super::components::*;
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct LevelHandle(pub Handle<Level>);
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct RoundHandle(pub Handle<Round>);
-
-impl Default for RoundHandle {
-    fn default() -> Self {
-        RoundHandle(Handle::default())
-    }
-}
 
 #[derive(Resource, Default)]
 pub struct CurrentLevel {
-    pub level_index: usize,
-    pub running: bool,
+    pub level: Option<Level>,
+    pub index: usize,
 }
 
 #[derive(Resource, Default)]

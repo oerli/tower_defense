@@ -9,6 +9,7 @@ use crate::enemy::components::*;
 pub struct Level {
     pub waypoints: Vec<Vec3>,
     pub rounds: usize,
+    pub last_level: bool,
 }
 
 #[derive(Component, Deserialize, Asset, TypePath, Clone, Debug)]
