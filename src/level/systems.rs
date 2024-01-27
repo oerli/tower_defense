@@ -1,5 +1,3 @@
-use std::thread::current;
-
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -7,6 +5,7 @@ use bevy_rapier3d::prelude::*;
 use rand::Rng;
 
 use crate::components::*;
+use crate::defense::components::*;
 use crate::enemy::components::*;
 use crate::enemy::events::*;
 use crate::player::resources::*;
@@ -20,7 +19,8 @@ use super::resources::*;
 
 pub fn setup_level(
     mut commands: Commands,
-    query_tiles: Query<(Entity, &Transform), With<Tile>>,
+    query_tiles: Query<Entity, With<Tile>>,
+    query_defense: Query<Entity, With<Defense>>,
     asset_server: Res<AssetServer>,
     level: Res<LevelHandle>,
     mut levels: ResMut<Assets<Level>>,
@@ -30,8 +30,12 @@ pub fn setup_level(
         let mut rng = rand::thread_rng();
 
         // remove all tiles
-        for (entity, _) in query_tiles.iter() {
-            commands.entity(entity).despawn_recursive();
+        for tile_entity in query_tiles.iter() {
+            commands.entity(tile_entity).despawn_recursive();
+        }
+        // remvoe all defenses
+        for defense_entity in query_defense.iter() {
+            commands.entity(defense_entity).despawn_recursive();
         }
 
         // create tiles

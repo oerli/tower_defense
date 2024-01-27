@@ -60,7 +60,7 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     ));
 }
 
-pub fn setup_physics(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_physics(mut commands: Commands) {
     // create the ground
     commands.spawn((
         Collider::cuboid(9.0, 0.2, 9.0),
