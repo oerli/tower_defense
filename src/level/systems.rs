@@ -22,7 +22,6 @@ pub fn setup_level(
     mut levels: ResMut<Assets<Level>>,
 ) {
     if let Some(level) = levels.remove(level.0.id()) {
-
         let mut rng = rand::thread_rng();
 
         for (entity, transform) in query_tiles.iter() {
@@ -63,56 +62,37 @@ pub fn setup_level(
             }
         }
 
-        commands.spawn(Level { waypoints: level.waypoints }).with_children(|parent| {
-            parent.spawn(Round {
-                index: 0,
-                enemy: Enemy {
-                    speed: 0.1,
-                    health: 1.5,
-                    score: 5,
-                    waypoint: 0,
-                },
-                enemy_count: 5,
-                separation_timer: Timer::from_seconds(3.0, TimerMode::Repeating),
-            });
-            parent.spawn(Round {
-                index: 1,
-                enemy: Enemy {
-                    speed: 0.1,
-                    health: 2.0,
-                    score: 10,
-                    waypoint: 0,
-                },
-                enemy_count: 5,
-                separation_timer: Timer::from_seconds(2.0, TimerMode::Repeating),
-            });
-            parent.spawn(Round {
-                index: 2,
-                enemy: Enemy {
-                    speed: 0.1,
-                    health: 2.0,
-                    score: 15,
-                    waypoint: 0,
-                },
-                enemy_count: 5,
-                separation_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
-            });
-        });
+        // spawn level
+        commands.spawn(level);
+    }
+}
 
-        commands.insert_resource(Animations(vec![
-            // running animation
-            asset_server.load("models/orc.glb#Animation3"),
-            // dying animation
-            asset_server.load("models/orc.glb#Animation9"),
-            // jumping animation
-            asset_server.load("models/orc.glb#Animation5"),
-        ]));
+pub fn setup_round(
+    mut commands: Commands,
+    query_level: Query<Entity, With<Level>>,
+    round: Res<RoundHandle>,
+    mut rounds: ResMut<Assets<Round>>,
+) {
+    if let Ok(level_entity) = query_level.get_single() {
+        if let Some(round) = rounds.remove(round.0.id()) {
+            commands.entity(level_entity).with_children(|parent| {
+                parent.spawn((
+                    Lifetime {
+                        timer: Timer::from_seconds(
+                            round.separation_time.clone(),
+                            TimerMode::Repeating,
+                        ),
+                    },
+                    round,
+                ));
+            });
+        }
     }
 }
 
 pub fn spawn_enemies(
     // mut query_level: Query<&mut Level>,
-    mut query: Query<(Entity, &mut Round)>,
+    mut query: Query<(Entity, &mut Lifetime, &mut Round)>,
     time: Res<Time>,
     mut event_writer: EventWriter<SpawnEnemyEvent>,
     mut commands: Commands,
@@ -122,14 +102,14 @@ pub fn spawn_enemies(
     // sort rounds by index
     let mut round_entities = query.iter_mut().collect::<Vec<_>>();
 
-    round_entities.sort_by_key(|(_, round)| round.index);
+    round_entities.sort_by_key(|(_, _, round)| round.index);
 
     let round_entries = round_entities.len();
 
-    for (entity, mut round) in round_entities {
-        round.separation_timer.tick(time.delta());
+    for (entity, mut lifetime, mut round) in round_entities {
+        lifetime.timer.tick(time.delta());
 
-        if round.separation_timer.finished() {
+        if lifetime.timer.finished() {
             // if round is finished remove it otherwise spawn an enemy
             if round.enemy_count <= 0 {
                 // give player some credits, but not if it's the last round
@@ -158,4 +138,23 @@ pub fn spawn_enemies(
 pub fn load_levels(mut commands: Commands, asset_server: Res<AssetServer>) {
     let level = LevelHandle(asset_server.load("levels/first.level.toml"));
     commands.insert_resource(level);
+
+    // load animations for orc
+    commands.insert_resource(Animations(vec![
+        // running animation
+        asset_server.load("models/orc.glb#Animation3"),
+        // dying animation
+        asset_server.load("models/orc.glb#Animation9"),
+        // jumping animation
+        asset_server.load("models/orc.glb#Animation5"),
+    ]));
+}
+
+pub fn load_rounds(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let round = RoundHandle(asset_server.load("levels/first.round.toml"));
+    commands.insert_resource(round);
+    // let round = RoundHandle(asset_server.load("levels/second.round.toml"));
+    // commands.insert_resource(round);
+    // let round = RoundHandle(asset_server.load("levels/third.round.toml"));
+    // commands.insert_resource(round);
 }

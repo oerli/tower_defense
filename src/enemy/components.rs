@@ -1,7 +1,9 @@
 use bevy::prelude::*;
+use bevy::asset::Asset;
+use serde::Deserialize;
+use bevy::reflect::TypePath;
 
-#[derive(Reflect, Component, Default, Clone, Debug)]
-#[reflect(Component)]
+#[derive(Component, Deserialize, Asset, TypePath, Clone, Debug)]
 pub struct Enemy {
     pub speed: f32,
     pub health: f32,

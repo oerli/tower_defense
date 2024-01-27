@@ -1,0 +1,7 @@
+index = 2
+separation_time = 1.0
+enemy.speed = 0.1
+enemy.health = 2.0
+enemy.score = 15
+enemy.waypoint = 0
+enemy_count = 5
