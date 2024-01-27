@@ -150,7 +150,7 @@ pub fn spawn_enemies(
                         current_round.round = None;
 
                         // show menu to choose from tower for next round
-                        next_game_state.set(GameState::Paused);
+                        next_game_state.set(GameState::RoundEnded);
                     }
                 } else {
                     round.enemy_count -= 1;

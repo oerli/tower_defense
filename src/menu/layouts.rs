@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{egui, EguiContexts, egui::Vec2};
 
+use crate::player::resources::*;
 use crate::GameState;
 use crate::defense::components::*;
 use crate::defense::resources::*;
@@ -155,6 +156,49 @@ pub fn tower_selection(
                 ui.label("Ballista Tower\nCredits: 10\nRange: 3, Frequency: 0.5s, Damage: 0.3");
                 ui.label("Archer Tower\nCredits: 10\nRange: 3, Frequency: 0.2s, Damage: 0.1");
 
+                ui.end_row();
+            });
+        });
+}
+
+
+pub fn high_scores(
+    mut contexts: EguiContexts,
+    player: Res<Player>,
+) {
+    egui::Window::new("High Scores")
+        .resizable(false)
+        .collapsible(false)
+        .title_bar(false)
+        .default_pos([140.0, 140.0])
+        .show(contexts.ctx_mut(), |ui| {
+            egui::Grid::new("players").striped(true).show(ui, |ui| {
+                ui.label("Game Over!");
+                ui.end_row();
+
+                ui.label(format!("Player\nName: {}\tLevel: {}\tLives: {}\tScore: {}\tCredits:{}", player.name, player.level, player.lives, player.score, player.credits));
+                ui.end_row();
+            });
+        });
+}
+
+pub fn show_pause(
+    mut contexts: EguiContexts,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    egui::Window::new("Pause Menu")
+        .resizable(false)
+        .collapsible(false)
+        .title_bar(false)
+        .default_pos([140.0, 140.0])
+        .show(contexts.ctx_mut(), |ui| {
+            egui::Grid::new("pause").striped(true).show(ui, |ui| {
+                if ui
+                    .add(egui::Button::new("Resume").min_size(Vec2::new(80.0, 80.0)))
+                    .clicked()
+                {
+                    next_game_state.set(GameState::Playing);
+                }
                 ui.end_row();
             });
         });

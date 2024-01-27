@@ -66,7 +66,8 @@ fn main() {
 #[derive(States, Default, Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum GameState {
     Playing,
-    #[default]
     Paused,
+    #[default]
+    RoundEnded,
     GameOver,
 }

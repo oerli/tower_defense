@@ -90,7 +90,7 @@ pub fn change_game_state(
     if keyboard_input.just_pressed(KeyCode::Space) {
         if *game_state.get() == GameState::Playing {
             next_game_state.set(GameState::Paused);
-        } else {
+        } else if *game_state.get() == GameState::Paused {
             next_game_state.set(GameState::Playing);
         }
     }
