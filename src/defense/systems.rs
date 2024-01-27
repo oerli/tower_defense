@@ -17,6 +17,7 @@ pub fn defense_shooting(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     for (defense_entity, mut defense, defense_transform, children) in defense_query.iter_mut() {
         for (collider1, collider2, intersecting) in
@@ -74,6 +75,10 @@ pub fn defense_shooting(
                         torque_impulse: Vec3::new(0.0, 0.0, 0.0),
                     },
                     Bullet::new(enemy_transform.translation(), 1.0, defense.damage),
+                    AudioBundle {
+                        source: asset_server.load("sounds/shoot.ogg"),
+                        settings: PlaybackSettings::ONCE.with_spatial(true),
+                    },
                     CollisionGroups::new(Group::GROUP_1, Group::GROUP_3 | Group::GROUP_4),
                     Lifetime {
                         timer: Timer::from_seconds(1.0, TimerMode::Once),

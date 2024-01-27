@@ -32,6 +32,10 @@ pub fn spawn_enemy(
                 Group::GROUP_3,
                 Group::GROUP_1 | Group::GROUP_2 | Group::GROUP_4,
             ),
+            AudioBundle {
+                source: asset_server.load("sounds/footstep.ogg"),
+                settings: PlaybackSettings::LOOP.with_spatial(true).with_speed(0.8),
+            },
             event.enemy.clone(),
         ));
     }

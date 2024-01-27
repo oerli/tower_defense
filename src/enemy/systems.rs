@@ -77,6 +77,7 @@ pub fn enemy_destroyed(
     children: Query<&Children>,
     mut collision_group_query: Query<&mut CollisionGroups>,
     enemy_health_query: Query<&EnemyHealth>,
+    music_controller: Query<&SpatialAudioSink>,
 ) {
     for (entity, enemy) in query.iter() {
         if enemy.health <= 0.0 {
@@ -94,6 +95,11 @@ pub fn enemy_destroyed(
                 if let Ok(_enemy_health) = enemy_health_query.get(entity) {
                     commands.entity(entity).despawn_recursive();
                 }
+            }
+
+            // stop running sound
+            if let Ok(sink) = music_controller.get(entity) {
+                sink.stop();
             }
 
             commands.entity(entity).remove::<Enemy>();
