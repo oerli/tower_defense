@@ -27,7 +27,7 @@ impl Plugin for LevelPlugin {
             // Systems
             .add_systems(Startup, load_assets)
             .add_systems(Update, load_levels)
-            .add_systems(Update, load_rounds.run_if(in_state(GameState::Playing)))
+            .add_systems(Update, load_rounds)
             .add_systems(Update, setup_level)
             .add_systems(Update, setup_round)
             
