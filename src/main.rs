@@ -46,6 +46,9 @@ fn main() {
         .add_plugins(MenuPlugin)
         // Resources
         .init_resource::<HoverHandler>()
+        .insert_resource(RapierBackendSettings {
+            require_markers: true,
+        })
         // Events
         .add_event::<BuildEvent>()
         .add_event::<OverEvent>()

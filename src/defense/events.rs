@@ -47,19 +47,20 @@ pub fn spawn_defense(
                             },
                             RigidBody::Dynamic,
                             Defense {
-                                // targets: VecDeque::new(),
                                 damage: 0.5,
                                 shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
                             },
                             Collider::ball(3.0),
                             Sensor,
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
-                            Pickable::IGNORE,
                         ))
                         .with_children(|parent| {
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
+                                PickableBundle::default(),
+                                RapierPickable,
+                                On::<Pointer<Click>>::send_event::<RangeEvent>(),
                             ));
                             parent.spawn((
                                 SceneBundle {
@@ -84,19 +85,20 @@ pub fn spawn_defense(
                             },
                             RigidBody::Dynamic,
                             Defense {
-                                // targets: VecDeque::new(),
                                 damage: 0.3,
                                 shooting_timer: Timer::from_seconds(0.5, TimerMode::Repeating),
                             },
                             Collider::ball(3.0),
                             Sensor,
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
-                            Pickable::IGNORE,
                         ))
                         .with_children(|parent| {
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
+                                On::<Pointer<Click>>::send_event::<RangeEvent>(),
+                                PickableBundle::default(),
+                                RapierPickable,
                             ));
                             parent.spawn((
                                 SceneBundle {
@@ -121,19 +123,20 @@ pub fn spawn_defense(
                             },
                             RigidBody::Dynamic,
                             Defense {
-                                // targets: VecDeque::new(),
                                 damage: 0.1,
                                 shooting_timer: Timer::from_seconds(0.2, TimerMode::Repeating),
                             },
                             Collider::ball(2.0),
                             Sensor,
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
-                            Pickable::IGNORE,
                         ))
                         .with_children(|parent| {
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
+                                On::<Pointer<Click>>::send_event::<RangeEvent>(),
+                                PickableBundle::default(),
+                                RapierPickable,
                             ));
                             parent.spawn((Weapon::Archer,));
                         });
@@ -143,5 +146,83 @@ pub fn spawn_defense(
 
         // disable the build event for multiple clicks
         commands.entity(event.entity).remove::<On<Pointer<Click>>>();
+    }
+}
+
+#[derive(Event)]
+pub struct RangeEvent {
+    pub button: PointerButton,
+    pub entity: Entity,
+}
+
+impl From<ListenerInput<Pointer<Click>>> for RangeEvent {
+    fn from(event: ListenerInput<Pointer<Click>>) -> Self {
+        RangeEvent {
+            button: event.event.button,
+            entity: event.target,
+        }
+    }
+}
+
+// spawn defense range under the defense entity
+pub fn range_event(
+    mut range_events: EventReader<RangeEvent>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    parent_query: Query<&Parent>,
+    defense_range_query: Query<(Entity, &Parent), With<DefenseRange>>,
+    collider_query: Query<&Collider>,
+) {
+    for event in range_events.read() {
+        if event.button != PointerButton::Primary {
+            continue;
+        }
+
+        // toggle hide or show for same defense
+        let mut show_defense_range = true;
+
+        // despawn all defense ranges, get parent from event and compare parent of defense range entity
+        for (range_entity, range_parent) in defense_range_query.iter() {
+            if let Ok(event_parent) = parent_query.get(event.entity) {
+                if event_parent.get() == range_parent.get() {
+                    // defense range was already shown, hide it
+                    show_defense_range = false;
+                }
+            }
+            // remove all current defense ranges (should only be one)
+            commands.entity(range_entity).despawn_recursive();
+        }
+
+        // finished if defense range was already shown
+        if show_defense_range == false {
+            continue;
+        }
+
+        // create defense range info, spawn below defense entity as own entity
+        if let Ok(defense_parent) = parent_query.get(event.entity) {
+            // get collider range info from parent
+            if let Ok(defense_collider) = collider_query.get(defense_parent.get()) {
+                // create defense range entity below defense entity
+                commands.entity(defense_parent.get()).with_children(|parent| {
+                    parent.spawn((
+                        PbrBundle {
+                            mesh: asset_server.add(Mesh::from(shape::Torus {
+                                // subtract ring_radius from range
+                                radius: defense_collider.as_ball().unwrap().radius() - 0.02,
+                                ring_radius: 0.02,
+                                ..Default::default()
+                            })),
+                            material: asset_server.add(StandardMaterial {
+                                base_color: Color::rgb(0.8, 0.2, 0.2),
+                                ..Default::default()
+                            }),
+                            transform: Transform::from_translation(Vec3::new(0.0, 0.3, 0.0)),
+                            ..Default::default()
+                        },
+                        DefenseRange,
+                    ));
+                });
+            }
+        }
     }
 }

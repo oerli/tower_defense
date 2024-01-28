@@ -13,3 +13,6 @@ pub enum Weapon {
     Ballista,
     Archer,
 }
+
+#[derive(Component)]
+pub struct DefenseRange;

@@ -18,6 +18,9 @@ impl Plugin for DefensePlugin {
         app
             // Resources
             .init_resource::<DefenseSelection>()
+            // Events
+            .add_event::<RangeEvent>()
+            .add_systems(Update, range_event.run_if(on_event::<RangeEvent>()))
             // Systems
             .add_systems(
                 Update,

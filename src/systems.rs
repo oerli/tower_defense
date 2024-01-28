@@ -42,6 +42,7 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
             focus: Vec3::new(0.0, 1.0, 2.0),
             ..Default::default()
         },
+        RapierPickable,
     ));
 
     // show player score
@@ -66,7 +67,6 @@ pub fn setup_physics(mut commands: Commands) {
         Collider::cuboid(9.0, 0.2, 9.0),
         CollisionGroups::new(Group::GROUP_4, Group::all()),
         TransformBundle::from(Transform::from_xyz(-0.5, -0.6, -0.5)),
-        Pickable::IGNORE,
     ));    
 }
 

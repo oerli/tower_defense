@@ -79,6 +79,7 @@ pub fn setup_level(
                                 ..Default::default()
                             },
                             PickableBundle::default(),
+                            RapierPickable,
                             Collider::cuboid(0.50, 0.2, 0.5),
                             CollisionGroups::new(Group::GROUP_5, Group::GROUP_5),
                             On::<Pointer<Click>>::send_event::<BuildEvent>(),
@@ -190,9 +191,11 @@ pub fn load_rounds(
 ) {
     if let Some(level) = &current_level.level {
         if current_round.round.is_none() && current_round.index < level.rounds {
-            let round_handle = RoundHandle(
-                asset_server.load(format!("levels/{:02}.{:02}.round.toml", current_level.index + 1, current_round.index + 1)),
-            );
+            let round_handle = RoundHandle(asset_server.load(format!(
+                "levels/{:02}.{:02}.round.toml",
+                current_level.index + 1,
+                current_round.index + 1
+            )));
             commands.insert_resource(round_handle);
         }
 
