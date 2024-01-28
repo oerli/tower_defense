@@ -7,7 +7,7 @@ use bevy_rapier3d::prelude::*;
 
 use crate::level::resources::*;
 use crate::player::resources::*;
-use crate::resources::*;
+use crate::{resources::*, GameState};
 
 use super::components::*;
 
@@ -27,6 +27,7 @@ pub fn enemy_movement(
     animations: Res<Animations>,
     children: Query<&Children>,
     music_controller: Query<&SpatialAudioSink>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     if let Some(level) = &current_level.level {
         for (entity, mut enemy, mut velocity, position, mut transform) in query.iter_mut() {
@@ -48,6 +49,11 @@ pub fn enemy_movement(
             } else if enemy.health > 0.0 {
                 // enemy reached goal
                 player.lives -= 1;
+
+                // set game over if lifes are 0
+                if player.lives <= 0 {
+                    next_game_state.set(GameState::GameOver);
+                }
 
                 for entity in children.iter_descendants(entity) {
                     if let Ok(mut animation_player) = animation_players.get_mut(entity) {
