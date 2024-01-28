@@ -26,6 +26,7 @@ pub fn enemy_movement(
     mut animation_players: Query<&mut AnimationPlayer>,
     animations: Res<Animations>,
     children: Query<&Children>,
+    music_controller: Query<&SpatialAudioSink>,
 ) {
     if let Some(level) = &current_level.level {
         for (entity, mut enemy, mut velocity, position, mut transform) in query.iter_mut() {
@@ -58,6 +59,12 @@ pub fn enemy_movement(
                             .set_repeat(RepeatAnimation::Count(8));
                     }
                 }
+            
+                // stop running sound
+                if let Ok(sink) = music_controller.get(entity) {
+                    sink.stop();
+                }
+                
                 commands.entity(entity).remove::<Enemy>();
                 // despawn the enemy after 3 seconds
                 commands.entity(entity).insert(DespawnTimer {

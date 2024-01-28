@@ -34,7 +34,7 @@ pub fn spawn_enemy(
             ),
             AudioBundle {
                 source: asset_server.load("sounds/footstep.ogg"),
-                settings: PlaybackSettings::LOOP.with_spatial(true).with_speed(0.8),
+                settings: PlaybackSettings::LOOP.with_spatial(true).with_speed(1.0),
             },
             event.enemy.clone(),
         ));

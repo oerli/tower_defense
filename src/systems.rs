@@ -43,6 +43,7 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
             ..Default::default()
         },
         RapierPickable,
+        SpatialListener::new(5.0),
     ));
 
     // show player score
