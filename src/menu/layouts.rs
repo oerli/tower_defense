@@ -1,6 +1,7 @@
 use bevy::prelude::*;
-use bevy_egui::egui::{Align2, Stroke};
-use bevy_egui::{egui, egui::Vec2, EguiContexts};
+use bevy_egui::{
+    egui, egui::Align2, egui::Label, egui::RichText, egui::Vec2, EguiContexts,
+};
 
 use crate::defense::components::*;
 use crate::defense::resources::*;
@@ -171,16 +172,32 @@ pub fn high_scores(mut contexts: EguiContexts, player: Res<Player>) {
         .title_bar(false)
         .anchor(Align2::CENTER_CENTER, Vec2::new(0.0, 0.0))
         .show(contexts.ctx_mut(), |ui| {
-            egui::Grid::new("players").striped(true).show(ui, |ui| {
-                ui.label("Game Over!");
-                ui.end_row();
+            ui.add_sized(
+                Vec2::new(ui.available_width(), 0.0),
+                Label::new(RichText::new("Game Over!").heading().strong()),
+            );
+            ui.end_row();
 
-                ui.label(format!(
-                    "Player\nName: {}\tLevel: {}\tLives: {}\tScore: {}\tCredits:{}",
-                    player.name, player.level, player.lives, player.score, player.credits
-                ));
-                ui.end_row();
-            });
+            egui::Grid::new("players")
+                .striped(true)
+                .num_columns(5)
+                .spacing([40.0, 4.0])
+                .show(ui, |ui| {
+                    ui.label(RichText::new("Name").heading());
+                    ui.label(RichText::new("Level").heading());
+                    ui.label(RichText::new("Lives").heading());
+                    ui.label(RichText::new("Score").heading());
+                    ui.label(RichText::new("Credits").heading());
+                    ui.end_row();
+
+                    ui.label(format!("{}", player.name));
+                    ui.label(format!("{}", player.level));
+                    ui.label(format!("{}", player.lives));
+                    ui.label(format!("{}", player.score));
+                    ui.label(format!("{}", player.credits));
+
+                    ui.end_row();
+                });
         });
 }
 
