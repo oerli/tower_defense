@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -42,30 +44,146 @@ pub fn setup_level(
         for x in -8..8 {
             for z in -8..8 {
                 let mut tile_is_path = false;
-                for position in level.waypoints.iter() {
+                for (index, position) in level.waypoints.iter().enumerate() {
                     // check if tile is a path
                     if x as f32 == position.x && z as f32 == position.z {
-                        commands
-                            .spawn((
+                        // check if it's first tile
+                        if index == 0 {
+                            let direction =
+                                (*level.waypoints.get(index + 1).unwrap() - *position).normalize();
+                            let rotation_angle = direction.x.atan2(direction.z) + PI;
+                            let rotation = Quat::from_rotation_y(rotation_angle);
+
+                            commands.spawn((
                                 SceneBundle {
-                                    scene: asset_server.load("models/path.glb#Scene0"),
-                                    transform: Transform::from_xyz(position.x, 0.0, position.z),
+                                    scene: asset_server.load("models/tile_end.glb#Scene0"),
+                                    transform: Transform::from_xyz(position.x, 0.0, position.z)
+                                        .with_rotation(rotation),
                                     ..Default::default()
                                 },
                                 Tile,
-                            ))
-                            .with_children(|parent| {
-                                // create some dirt on street
-                                if 0.3 > rng.gen() {
-                                    parent.spawn(SceneBundle {
-                                        scene: asset_server.load("models/dirt.glb#Scene0"),
-                                        transform: Transform::from_xyz(0.0, 0.2, 0.0),
-                                        ..Default::default()
-                                    });
+                            ));
+                            tile_is_path = true;
+                            break;
+                        }
+
+                        // check if it's last tile
+                        if index == level.waypoints.len() - 1 {
+                            let direction =
+                                (*level.waypoints.get(index - 1).unwrap() - *position).normalize();
+                            let rotation_angle = direction.x.atan2(direction.z) + PI;
+                            let rotation = Quat::from_rotation_y(rotation_angle);
+
+                            commands.spawn((
+                                SceneBundle {
+                                    scene: asset_server.load("models/tile_end.glb#Scene0"),
+                                    transform: Transform::from_xyz(position.x, 0.0, position.z)
+                                        .with_rotation(rotation),
+                                    ..Default::default()
+                                },
+                                Tile,
+                            ));
+                            tile_is_path = true;
+                            break;
+                        }
+
+                        if let Some(previous_position) = level.waypoints.get(index - 1) {
+                            if let Some(next_position) = level.waypoints.get(index + 1) {
+                                let backward_direction =
+                                    (*previous_position - *position).normalize();
+                                let forward_direction = (*next_position - *position).normalize();
+
+                                let backward_rotation_angle =
+                                    backward_direction.x.atan2(backward_direction.z) + PI;
+                                let forward_rotation_angle =
+                                    forward_direction.x.atan2(forward_direction.z) + PI;
+
+                                // check if it's a straight tile
+                                if backward_direction.x == forward_direction.x
+                                    || backward_direction.z == forward_direction.z
+                                {
+                                    let rotation = Quat::from_rotation_y(forward_rotation_angle);
+                                    commands.spawn((
+                                        SceneBundle {
+                                            scene: asset_server
+                                                .load("models/tile_straight.glb#Scene0"),
+                                            transform: Transform::from_xyz(
+                                                position.x, 0.0, position.z,
+                                            )
+                                            .with_rotation(rotation),
+                                            ..Default::default()
+                                        },
+                                        Tile,
+                                    ));
+                                    tile_is_path = true;
+                                    break;
+                                } else {
+                                    // calculate the rotation of a corner tile from last, current and next tile
+                                    // todo: review if there would be any better option
+                                    let rotation = if forward_direction.x - backward_direction.x
+                                        < 0.0
+                                        && forward_direction.z - backward_direction.z > 0.0
+                                    {
+                                        let rotation_angle =
+                                            forward_rotation_angle - backward_rotation_angle;
+                                        Quat::from_rotation_y(rotation_angle)
+                                    } else if forward_direction.x - backward_direction.x < 0.0
+                                        && forward_direction.z - backward_direction.z < 0.0
+                                    {
+                                        let rotation_angle =
+                                            forward_rotation_angle - backward_rotation_angle;
+                                        Quat::from_rotation_y(rotation_angle + PI)
+                                    } else if forward_direction.x - backward_direction.x > 0.0
+                                        && forward_direction.z - backward_direction.z > 0.0
+                                    {
+                                        let rotation_angle =
+                                            forward_rotation_angle - backward_rotation_angle;
+                                        Quat::from_rotation_y(rotation_angle)
+                                    } else {
+                                        let rotation_angle =
+                                            forward_rotation_angle - backward_rotation_angle;
+                                        Quat::from_rotation_y(rotation_angle + PI / 2.0)
+                                    };
+
+                                    commands.spawn((
+                                        SceneBundle {
+                                            scene: asset_server
+                                                .load("models/tile_corner.glb#Scene0"),
+                                            transform: Transform::from_xyz(
+                                                position.x, 0.0, position.z,
+                                            )
+                                            .with_rotation(rotation),
+                                            ..Default::default()
+                                        },
+                                        Tile,
+                                    ));
+                                    tile_is_path = true;
+                                    break;
                                 }
-                            });
-                        tile_is_path = true;
-                        break;
+                            }
+                        }
+
+                        // commands
+                        //     .spawn((
+                        //         SceneBundle {
+                        //             scene: asset_server.load("models/path.glb#Scene0"),
+                        //             transform: Transform::from_xyz(position.x, 0.0, position.z),
+                        //             ..Default::default()
+                        //         },
+                        //         Tile,
+                        //     ))
+                        //     .with_children(|parent| {
+                        //         // create some dirt on street
+                        //         if 0.3 > rng.gen() {
+                        //             parent.spawn(SceneBundle {
+                        //                 scene: asset_server.load("models/dirt.glb#Scene0"),
+                        //                 transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                        //                 ..Default::default()
+                        //             });
+                        //         }
+                        //     });
+                        // tile_is_path = true;
+                        // break;
                     }
                 }
 
