@@ -24,10 +24,6 @@ pub fn defense_shooting(
         // wait time is finished to shoot is finished
         defense.shooting_timer.tick(time.delta());
 
-        if !defense.shooting_timer.finished() {
-            continue;
-        }
-
         for (collider1, collider2, intersecting) in
             rapier_context.intersections_with(defense_entity)
         {
@@ -58,6 +54,11 @@ pub fn defense_shooting(
                     if let Ok(weapon) = weapon_query.get(*child) {
                         weapon_type = weapon.clone();
                     }
+                }
+
+                // timer is not finished, but let the weapon move towards enemy
+                if !defense.shooting_timer.finished() {
+                    break;
                 }
 
                 let (bullet_mesh, bullet_color) = match weapon_type {
