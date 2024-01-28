@@ -54,15 +54,23 @@ pub fn setup_level(
                             let rotation_angle = direction.x.atan2(direction.z) + PI;
                             let rotation = Quat::from_rotation_y(rotation_angle);
 
-                            commands.spawn((
-                                SceneBundle {
-                                    scene: asset_server.load("models/tile_end.glb#Scene0"),
-                                    transform: Transform::from_xyz(position.x, 0.0, position.z)
-                                        .with_rotation(rotation),
-                                    ..Default::default()
-                                },
-                                Tile,
-                            ));
+                            commands
+                                .spawn((
+                                    SceneBundle {
+                                        scene: asset_server.load("models/tile_end.glb#Scene0"),
+                                        transform: Transform::from_xyz(position.x, 0.0, position.z)
+                                            .with_rotation(rotation),
+                                        ..Default::default()
+                                    },
+                                    Tile,
+                                ))
+                                .with_children(|parent| {
+                                    parent.spawn(SceneBundle {
+                                        scene: asset_server.load("models/arc.glb#Scene0"),
+                                        transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                                        ..Default::default()
+                                    });
+                                });
                             tile_is_path = true;
                             break;
                         }
@@ -74,15 +82,28 @@ pub fn setup_level(
                             let rotation_angle = direction.x.atan2(direction.z) + PI;
                             let rotation = Quat::from_rotation_y(rotation_angle);
 
-                            commands.spawn((
-                                SceneBundle {
-                                    scene: asset_server.load("models/tile_end.glb#Scene0"),
-                                    transform: Transform::from_xyz(position.x, 0.0, position.z)
-                                        .with_rotation(rotation),
-                                    ..Default::default()
-                                },
-                                Tile,
-                            ));
+                            commands
+                                .spawn((
+                                    SceneBundle {
+                                        scene: asset_server.load("models/tile_end.glb#Scene0"),
+                                        transform: Transform::from_xyz(position.x, 0.0, position.z)
+                                            .with_rotation(rotation),
+                                        ..Default::default()
+                                    },
+                                    Tile,
+                                ))
+                                .with_children(|parent| {
+                                    parent.spawn(SceneBundle {
+                                        scene: asset_server.load("models/arc.glb#Scene0"),
+                                        transform: Transform::from_xyz(0.0, 0.2, -0.6),
+                                        ..Default::default()
+                                    });
+                                    parent.spawn(SceneBundle {
+                                        scene: asset_server.load("models/banner.glb#Scene0"),
+                                        transform: Transform::from_xyz(0.0, 0.2, -0.2),
+                                        ..Default::default()
+                                    });
+                                });
                             tile_is_path = true;
                             break;
                         }
@@ -103,18 +124,30 @@ pub fn setup_level(
                                     || backward_direction.z == forward_direction.z
                                 {
                                     let rotation = Quat::from_rotation_y(forward_rotation_angle);
-                                    commands.spawn((
-                                        SceneBundle {
-                                            scene: asset_server
-                                                .load("models/tile_straight.glb#Scene0"),
-                                            transform: Transform::from_xyz(
-                                                position.x, 0.0, position.z,
-                                            )
-                                            .with_rotation(rotation),
-                                            ..Default::default()
-                                        },
-                                        Tile,
-                                    ));
+                                    commands
+                                        .spawn((
+                                            SceneBundle {
+                                                scene: asset_server
+                                                    .load("models/tile_straight.glb#Scene0"),
+                                                transform: Transform::from_xyz(
+                                                    position.x, 0.0, position.z,
+                                                )
+                                                .with_rotation(rotation),
+                                                ..Default::default()
+                                            },
+                                            Tile,
+                                        ))
+                                        .with_children(|parent| {
+                                            // create some dirt on street
+                                            if 0.3 > rng.gen() {
+                                                parent.spawn(SceneBundle {
+                                                    scene: asset_server
+                                                        .load("models/dirt.glb#Scene0"),
+                                                    transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                                                    ..Default::default()
+                                                });
+                                            }
+                                        });
                                     tile_is_path = true;
                                     break;
                                 } else {
@@ -162,28 +195,6 @@ pub fn setup_level(
                                 }
                             }
                         }
-
-                        // commands
-                        //     .spawn((
-                        //         SceneBundle {
-                        //             scene: asset_server.load("models/path.glb#Scene0"),
-                        //             transform: Transform::from_xyz(position.x, 0.0, position.z),
-                        //             ..Default::default()
-                        //         },
-                        //         Tile,
-                        //     ))
-                        //     .with_children(|parent| {
-                        //         // create some dirt on street
-                        //         if 0.3 > rng.gen() {
-                        //             parent.spawn(SceneBundle {
-                        //                 scene: asset_server.load("models/dirt.glb#Scene0"),
-                        //                 transform: Transform::from_xyz(0.0, 0.2, 0.0),
-                        //                 ..Default::default()
-                        //             });
-                        //         }
-                        //     });
-                        // tile_is_path = true;
-                        // break;
                     }
                 }
 

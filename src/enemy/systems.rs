@@ -40,7 +40,7 @@ pub fn enemy_movement(
                 direction.y = 0.0;
                 let distance = direction.length();
 
-                if distance < 0.5 {
+                if distance < 1.0 {
                     enemy.waypoint += 1;
                 } else {
                     direction = direction.normalize();
