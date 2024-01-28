@@ -67,7 +67,7 @@ pub fn tower_selection(
                             .id(),
                     );
 
-                    next_game_state.set(GameState::Playing);
+                    next_game_state.set(GameState::Paused);
                 }
 
                 if ui
@@ -109,7 +109,7 @@ pub fn tower_selection(
                             .id(),
                     );
 
-                    next_game_state.set(GameState::Playing);
+                    next_game_state.set(GameState::Paused);
                 }
 
                 if ui
@@ -151,7 +151,7 @@ pub fn tower_selection(
                             .id(),
                     );
 
-                    next_game_state.set(GameState::Playing);
+                    next_game_state.set(GameState::Paused);
                 }
 
                 ui.end_row();

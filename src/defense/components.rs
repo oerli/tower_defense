@@ -7,7 +7,7 @@ pub struct Defense {
     pub shooting_timer: Timer,
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub enum Weapon {
     Cannon,
     Ballista,

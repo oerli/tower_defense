@@ -16,6 +16,7 @@ pub fn spawn_defense(
     mut player: ResMut<Player>,
     transform_query: Query<&GlobalTransform>,
     game_state: Res<State<GameState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
 ) {
     for event in build_events.read() {
         if event.button != PointerButton::Primary {
@@ -23,7 +24,7 @@ pub fn spawn_defense(
         }
 
         // workaround for discarding build event when menu is active
-        if *game_state.get() != (GameState::Playing) {
+        if *game_state.get() != (GameState::Paused) && *game_state.get() != (GameState::Playing) {
             continue;
         }
 
@@ -146,6 +147,8 @@ pub fn spawn_defense(
 
         // disable the build event for multiple clicks
         commands.entity(event.entity).remove::<On<Pointer<Click>>>();
+        // set to playing state after build
+        next_game_state.set(GameState::Playing);
     }
 }
 
