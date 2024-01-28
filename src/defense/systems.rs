@@ -5,11 +5,7 @@ use bevy_rapier3d::prelude::*;
 
 use super::components::*;
 
-use crate::{
-    bullet::components::*,
-    components::*,
-    enemy::components::*,
-};
+use crate::{bullet::components::*, components::*, enemy::components::*};
 
 // unordered defense shooting and weapon moving to enemy
 pub fn defense_shooting(
@@ -25,9 +21,17 @@ pub fn defense_shooting(
     weapon_query: Query<&Weapon>,
 ) {
     for (defense_entity, mut defense, defense_transform, children) in defense_query.iter_mut() {
+        // wait time is finished to shoot is finished
+        defense.shooting_timer.tick(time.delta());
+
+        if !defense.shooting_timer.finished() {
+            continue;
+        }
+
         for (collider1, collider2, intersecting) in
             rapier_context.intersections_with(defense_entity)
         {
+            // no enemy in range
             if !intersecting {
                 continue;
             }
@@ -54,13 +58,6 @@ pub fn defense_shooting(
                     if let Ok(weapon) = weapon_query.get(*child) {
                         weapon_type = weapon.clone();
                     }
-                }
-
-                // wait time is finished to shoot is finished
-                defense.shooting_timer.tick(time.delta());
-
-                if !defense.shooting_timer.finished() {
-                    continue;
                 }
 
                 let (bullet_mesh, bullet_color) = match weapon_type {
@@ -102,9 +99,7 @@ pub fn defense_shooting(
                         transform: Transform::from_translation(
                             defense_transform.translation() + Vec3::new(0.0, 0.6, 0.0),
                         )
-                        .with_rotation(
-                            Quat::from_rotation_y(rotation_angle),
-                        ),
+                        .with_rotation(Quat::from_rotation_y(rotation_angle)),
                         ..default()
                     },
                     RigidBody::Dynamic,
