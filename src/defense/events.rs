@@ -17,8 +17,15 @@ pub fn spawn_defense(
     transform_query: Query<&GlobalTransform>,
     game_state: Res<State<GameState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    query_defense_range: Query<Entity, With<DefenseRange>>,
 ) {
     for event in build_events.read() {
+
+        // remove all current defense ranges (should only be one)
+        for range_entity in query_defense_range.iter() {
+            commands.entity(range_entity).despawn_recursive();
+        }
+
         if event.button != PointerButton::Primary {
             continue;
         }
