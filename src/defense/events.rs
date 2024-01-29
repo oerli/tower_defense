@@ -1,9 +1,12 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use super::components::*;
 use super::resources::*;
+use crate::enemy::components::*;
 use crate::player::resources::*;
 use crate::BuildEvent;
 use crate::GameState;
@@ -57,6 +60,7 @@ pub fn spawn_defense(
                             Defense {
                                 damage: 0.5,
                                 shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
+                                targets: VecDeque::new(),
                             },
                             Collider::ball(3.0),
                             Sensor,
@@ -95,6 +99,7 @@ pub fn spawn_defense(
                             Defense {
                                 damage: 0.3,
                                 shooting_timer: Timer::from_seconds(0.5, TimerMode::Repeating),
+                                targets: VecDeque::new(),
                             },
                             Collider::ball(3.0),
                             Sensor,
@@ -133,6 +138,7 @@ pub fn spawn_defense(
                             Defense {
                                 damage: 0.1,
                                 shooting_timer: Timer::from_seconds(0.2, TimerMode::Repeating),
+                                targets: VecDeque::new(),
                             },
                             Collider::ball(2.0),
                             Sensor,
@@ -232,6 +238,43 @@ pub fn range_event(
                         DefenseRange,
                     ));
                 });
+            }
+        }
+    }
+}
+
+pub fn enemy_contact(
+    mut collision_events: EventReader<CollisionEvent>,
+    mut defense_query: Query<&mut Defense>,
+    enemy_query: Query<&Enemy>,
+) {
+    for collision_event in collision_events.read() {
+        match collision_event {
+            CollisionEvent::Started(entity1, entity2, _flags) => {
+                // add target to defense
+                if enemy_query.get(*entity1).is_ok() {  
+                    if let Ok(mut defense) = defense_query.get_mut(*entity2) {
+                        defense.targets.push_back(*entity1);
+                        
+                    }
+                } else if enemy_query.get(*entity2).is_ok() {
+                    if let Ok(mut defense) = defense_query.get_mut(*entity1) {
+                        defense.targets.push_back(*entity2);
+                    }
+                }
+            }
+            // does not work if enemy is despawned
+            CollisionEvent::Stopped(entity1, entity2, _flags) => {
+                // remove target from defense
+                if enemy_query.get(*entity1).is_ok() {  
+                    if let Ok(mut defense) = defense_query.get_mut(*entity2) {
+                        defense.targets.retain(|&x| x != *entity1);
+                    }
+                } else if enemy_query.get(*entity2).is_ok() {
+                    if let Ok(mut defense) = defense_query.get_mut(*entity1) {
+                        defense.targets.retain(|&x| x != *entity2);
+                    }
+                } 
             }
         }
     }

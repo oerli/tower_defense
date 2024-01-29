@@ -20,12 +20,14 @@ impl Plugin for DefensePlugin {
             .init_resource::<DefenseSelection>()
             // Events
             .add_event::<RangeEvent>()
-            .add_systems(Update, range_event.run_if(on_event::<RangeEvent>()))
             // Systems
+            .add_systems(Update, range_event.run_if(on_event::<RangeEvent>()))
+            .add_systems(Update, enemy_contact.run_if(in_state(GameState::Playing)))
             .add_systems(
                 Update,
                 defense_shooting.run_if(in_state(GameState::Playing)),
             )
+            .add_systems(Update, weapon_rotation.run_if(in_state(GameState::Playing)))
             .add_systems(Update, spawn_defense.run_if(on_event::<BuildEvent>()));
     }
 }

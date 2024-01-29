@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 
 #[derive(Reflect, Component, Default, Debug)]
@@ -5,6 +7,8 @@ use bevy::prelude::*;
 pub struct Defense {
     pub damage: f32,
     pub shooting_timer: Timer,
+    // todo: use index instead of entity to have target at multiple defense towers
+    pub targets: VecDeque<Entity>,
 }
 
 #[derive(Component, Clone)]
