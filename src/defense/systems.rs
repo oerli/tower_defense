@@ -9,7 +9,6 @@ use crate::bullet::components::*;
 use crate::components::*;
 use crate::enemy::components::*;
 
-// unordered defense shooting and weapon moving to enemy
 pub fn defense_shooting(
     weapon_query: Query<(&GlobalTransform, &Parent, &Weapon)>,
     mut defense_query: Query<&mut Defense>,
@@ -29,7 +28,7 @@ pub fn defense_shooting(
                     // wait time is finished to shoot is finished
                     defense.shooting_timer.tick(time.delta());
                     if !defense.shooting_timer.finished() {
-                        break;
+                        continue;
                     }
 
                     // direction to enemy
@@ -104,16 +103,17 @@ pub fn defense_shooting(
 }
 
 pub fn weapon_rotation(
-    mut weapon_query: Query<(&mut Transform, &Parent), With<Weapon>>,
+    mut weapon_query: Query<(&mut Transform, &GlobalTransform, &Parent), With<Weapon>>,
     defense_query: Query<&Defense>,
     transform_query: Query<&GlobalTransform>,
 ) {
-    for (mut weapon_transform, parent) in weapon_query.iter_mut() {
+    for (mut weapon_transform, weapon_global_transform, parent) in weapon_query.iter_mut() {
         if let Ok(defense) = defense_query.get(parent.get()) {
             if let Some(target) = defense.targets.front() {
                 if let Ok(enemy_transform) = transform_query.get(*target) {
                     // look at enemy
-                    let direction = enemy_transform.translation() - weapon_transform.translation;
+                    let direction =
+                        enemy_transform.translation() - weapon_global_transform.translation();
                     // add PI for a 180 degree rotation
                     let rotation_angle = direction.x.atan2(direction.z) + PI;
                     weapon_transform.rotation = Quat::from_rotation_y(rotation_angle);

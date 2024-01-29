@@ -7,7 +7,6 @@ use bevy::prelude::*;
 pub struct Defense {
     pub damage: f32,
     pub shooting_timer: Timer,
-    // todo: use index instead of entity to have target at multiple defense towers
     pub targets: VecDeque<Entity>,
 }
 
