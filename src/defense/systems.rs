@@ -44,7 +44,8 @@ pub fn defense_shooting(
                 let mut weapon_type = Weapon::Cannon;
 
                 // look at enemy
-                let direction = enemy_transform.translation() - defense_transform.translation();
+                let direction = enemy_transform.translation()
+                    - (defense_transform.translation() + Vec3::new(0.0, 0.8, 0.0));
                 // add PI for a 180 degree rotation
                 let rotation_angle = direction.x.atan2(direction.z) + PI;
                 for child in children.iter() {
@@ -98,7 +99,7 @@ pub fn defense_shooting(
                         mesh: meshes.add(bullet_mesh),
                         material: materials.add(bullet_color.into()),
                         transform: Transform::from_translation(
-                            defense_transform.translation() + Vec3::new(0.0, 0.6, 0.0),
+                            defense_transform.translation() + Vec3::new(0.0, 1.0, 0.0),
                         )
                         .with_rotation(Quat::from_rotation_y(rotation_angle)),
                         ..default()
@@ -106,8 +107,7 @@ pub fn defense_shooting(
                     RigidBody::Dynamic,
                     Collider::cuboid(0.1, 0.1, 0.1),
                     ExternalImpulse {
-                        impulse: (enemy_transform.translation() - defense_transform.translation())
-                            * 0.05,
+                        impulse: direction * 0.05,
                         torque_impulse: Vec3::new(0.0, 0.0, 0.0),
                     },
                     Bullet::new(enemy_transform.translation(), 1.0, defense.damage),

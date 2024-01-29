@@ -49,11 +49,12 @@ pub fn hover_event(
                 if player.credits < 10 {
                     hover_handler.entity = None;
                     commands.entity(entity).despawn_recursive();
+                } else {
+                    transform.get_mut(entity).unwrap().translation =
+                        transform_query.get(event.entity).unwrap().translation()
+                            + Vec3::new(0.0, 0.1, 0.0);
+                    *visibility_query.get_mut(entity).unwrap() = Visibility::Visible;
                 }
-                transform.get_mut(entity).unwrap().translation =
-                    transform_query.get(event.entity).unwrap().translation()
-                        + Vec3::new(0.0, 0.1, 0.0);
-                *visibility_query.get_mut(entity).unwrap() = Visibility::Visible;
             }
             None => {}
         }
