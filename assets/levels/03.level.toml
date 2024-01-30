@@ -17,4 +17,4 @@ map = [
     [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
 ] 
 rounds = 3
-last_level = false
+last_level = true

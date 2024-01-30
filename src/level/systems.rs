@@ -189,7 +189,7 @@ pub fn setup_level(
                         && forward_direction.z - backward_direction.z > 0.0
                     {
                         let rotation_angle = forward_rotation_angle - backward_rotation_angle;
-                        Quat::from_rotation_y(rotation_angle)
+                        Quat::from_rotation_y(rotation_angle - PI / 2.0)
                     } else if forward_direction.x - backward_direction.x < 0.0
                         && forward_direction.z - backward_direction.z < 0.0
                     {

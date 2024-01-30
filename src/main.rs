@@ -35,7 +35,7 @@ fn main() {
         // .add_plugins(WorldInspectorPlugin::new())
         .add_plugins(EguiPlugin)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugins(RapierDebugRenderPlugin::default())
+        // .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins(PanOrbitCameraPlugin)
         .add_plugins(DefaultPickingPlugins.build().disable::<RaycastBackend>().disable::<DebugPickingPlugin>())
         .add_plugins(PlayerPlugin)
