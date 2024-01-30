@@ -16,7 +16,7 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
 
     // orange point light
     commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(0.0, 6.0, 0.0),
+        transform: Transform::from_xyz(8.0, 6.0, 8.0),
         point_light: PointLight {
             intensity: 3600.0,
             color: Color::Rgba {
@@ -34,12 +34,12 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
     // create the camera
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(0.0, 15.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
+            transform: Transform::from_xyz(8.0, 10.0, 14.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         },
         PanOrbitCamera {
             button_orbit: MouseButton::Middle,
-            focus: Vec3::new(0.0, 1.0, 2.0),
+            focus: Vec3::new(8.0, 1.0, 8.0),
             ..Default::default()
         },
         RapierPickable,
@@ -65,9 +65,9 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
 pub fn setup_physics(mut commands: Commands) {
     // create the ground
     commands.spawn((
-        Collider::cuboid(9.0, 0.2, 9.0),
+        Collider::cuboid(10.0, 0.2, 10.0),
         CollisionGroups::new(Group::GROUP_4, Group::all()),
-        TransformBundle::from(Transform::from_xyz(-0.5, -0.6, -0.5)),
+        TransformBundle::from(Transform::from_xyz(7.0, -0.6, 7.0)),
     ));    
 }
 

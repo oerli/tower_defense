@@ -31,51 +31,53 @@ pub fn enemy_movement(
 ) {
     if let Some(level) = &current_level.level {
         for (entity, mut enemy, mut velocity, position, mut transform) in query.iter_mut() {
-            if enemy.waypoint < level.waypoints.len() && enemy.health > 0.0 {
-                transform.look_at(level.waypoints[enemy.waypoint], Vec3::ZERO);
-                // TODO: dirty hack to rotate the enemy 180 degrees
-                transform.rotate(Quat::from_rotation_y(PI));
+            if let Some(waypoints) = &level.waypoints {
+                if enemy.waypoint < waypoints.len() && enemy.health > 0.0 {
+                    transform.look_at(waypoints[enemy.waypoint], Vec3::ZERO);
+                    // TODO: dirty hack to rotate the enemy 180 degrees
+                    transform.rotate(Quat::from_rotation_y(PI));
 
-                let mut direction = level.waypoints[enemy.waypoint] - position.translation();
-                direction.y = 0.0;
-                let distance = direction.length();
+                    let mut direction = waypoints[enemy.waypoint] - position.translation();
+                    direction.y = 0.0;
+                    let distance = direction.length();
 
-                if distance < 1.0 {
-                    enemy.waypoint += 1;
-                } else {
-                    direction = direction.normalize();
-                    velocity.linvel += direction * enemy.speed;
-                }
-            } else if enemy.health > 0.0 {
-                // enemy reached goal
-                player.lives -= 1;
-
-                // set game over if lifes are 0
-                if player.lives <= 0 {
-                    next_game_state.set(GameState::GameOver);
-                }
-
-                for entity in children.iter_descendants(entity) {
-                    if let Ok(mut animation_player) = animation_players.get_mut(entity) {
-                        animation_player
-                            .play_with_transition(
-                                animations.0[2].clone_weak(),
-                                Duration::from_millis(250),
-                            )
-                            .set_repeat(RepeatAnimation::Count(8));
+                    if distance < 1.0 {
+                        enemy.waypoint += 1;
+                    } else {
+                        direction = direction.normalize();
+                        velocity.linvel += direction * enemy.speed;
                     }
+                } else if enemy.health > 0.0 {
+                    // enemy reached goal
+                    player.lives -= 1;
+
+                    // set game over if lifes are 0
+                    if player.lives <= 0 {
+                        next_game_state.set(GameState::GameOver);
+                    }
+
+                    for entity in children.iter_descendants(entity) {
+                        if let Ok(mut animation_player) = animation_players.get_mut(entity) {
+                            animation_player
+                                .play_with_transition(
+                                    animations.0[2].clone_weak(),
+                                    Duration::from_millis(250),
+                                )
+                                .set_repeat(RepeatAnimation::Count(8));
+                        }
+                    }
+
+                    // stop running sound
+                    if let Ok(sink) = music_controller.get(entity) {
+                        sink.stop();
+                    }
+
+                    commands.entity(entity).remove::<Enemy>();
+                    // despawn the enemy after 3 seconds
+                    commands.entity(entity).insert(DespawnTimer {
+                        timer: Timer::from_seconds(3.0, TimerMode::Once),
+                    });
                 }
-            
-                // stop running sound
-                if let Ok(sink) = music_controller.get(entity) {
-                    sink.stop();
-                }
-                
-                commands.entity(entity).remove::<Enemy>();
-                // despawn the enemy after 3 seconds
-                commands.entity(entity).insert(DespawnTimer {
-                    timer: Timer::from_seconds(3.0, TimerMode::Once),
-                });
             }
         }
     }
