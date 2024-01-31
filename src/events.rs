@@ -46,7 +46,7 @@ pub fn hover_event(
         match hover_handler.entity {
             Some(entity) => {
                 // despawn hover tower and set hover handler to none
-                if player.credits < 10 {
+                if player.credits < 1 {
                     hover_handler.entity = None;
                     commands.entity(entity).despawn_recursive();
                 } else {

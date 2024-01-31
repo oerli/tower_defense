@@ -264,7 +264,7 @@ pub fn spawn_enemies(
                     // check if all enemies are destroyed
                     if query_enemy.iter().count() == 0 {
                         // give player some credits, but not if it's the last round
-                        player.credits += 10;
+                        player.credits += 1;
 
                         // set index to next round and remove current round
                         current_round.index += 1;

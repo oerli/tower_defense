@@ -1,7 +1,5 @@
 use bevy::prelude::*;
-use bevy_egui::{
-    egui, egui::Align2, egui::Label, egui::RichText, egui::Vec2, EguiContexts,
-};
+use bevy_egui::{egui, egui::Align2, egui::Label, egui::RichText, egui::Vec2, EguiContexts};
 
 use crate::defense::components::*;
 use crate::defense::resources::*;
@@ -156,9 +154,9 @@ pub fn tower_selection(
 
                 ui.end_row();
 
-                ui.label("Cannon Tower\nCredits: 10\nRange: 3, Frequency: 1s, Damage: 0.5");
-                ui.label("Ballista Tower\nCredits: 10\nRange: 3, Frequency: 0.5s, Damage: 0.3");
-                ui.label("Archer Tower\nCredits: 10\nRange: 3, Frequency: 0.2s, Damage: 0.1");
+                ui.label("Cannon Tower\nCredits: 1\nRange: 3, Frequency: 1s, Damage: 0.5");
+                ui.label("Ballista Tower\nCredits: 1\nRange: 3, Frequency: 0.5s, Damage: 0.3");
+                ui.label("Archer Tower\nCredits: 1\nRange: 3, Frequency: 0.2s, Damage: 0.1");
 
                 ui.end_row();
             });
@@ -206,6 +204,7 @@ pub fn show_pause(
     mut next_game_state: ResMut<NextState<GameState>>,
     asset_server: Res<AssetServer>,
     game_state: Res<State<GameState>>,
+    player: Res<Player>,
 ) {
     let play_image = contexts.add_image(asset_server.load("images/play.png"));
     let pause_image = contexts.add_image(asset_server.load("images/pause.png"));
@@ -224,7 +223,24 @@ pub fn show_pause(
         .title_bar(false)
         .anchor(Align2::CENTER_TOP, Vec2::new(0.0, 0.0))
         .show(contexts.ctx_mut(), |ui| {
-            egui::Grid::new("pause").striped(true).show(ui, |ui| {
+            egui::Grid::new("pause").min_col_width(48.0).show(ui, |ui| {
+                ui.vertical_centered(|ui| {
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(format!("Lives\n{}", player.lives)).heading(),
+                        )
+                        .wrap(false),
+                    );
+                });
+                ui.vertical_centered(|ui| {
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(format!("Level\n{}", player.level)).heading(),
+                        )
+                        .wrap(false),
+                    );
+                });
+
                 if ui
                     .add_enabled(
                         play_enabled,
@@ -249,6 +265,23 @@ pub fn show_pause(
                 {
                     next_game_state.set(GameState::Paused);
                 };
+
+                ui.vertical_centered(|ui| {
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(format!("Credits\n{}", player.credits)).heading(),
+                        )
+                        .wrap(false),
+                    );
+                });
+                ui.vertical_centered(|ui| {
+                    ui.add(
+                        egui::Label::new(
+                            RichText::new(format!("Score\n{}", player.score)).heading(),
+                        )
+                        .wrap(false),
+                    );
+                });
                 ui.end_row();
             });
         });

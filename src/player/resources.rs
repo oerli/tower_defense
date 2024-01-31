@@ -16,7 +16,7 @@ impl Default for Player {
             lives: 10,
             score: 0,
             level: 1,
-            credits: 10,
+            credits: 1,
         }
     }
 }
