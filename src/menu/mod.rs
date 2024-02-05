@@ -13,7 +13,7 @@ impl Plugin for MenuPlugin {
         app
             // Systems
             .add_systems(Update, tower_selection.run_if(in_state(GameState::RoundEnded)))
-            .add_systems(Update, show_pause)
+            .add_systems(Update, show_controls)
             .add_systems(Update, high_scores.run_if(in_state(GameState::GameOver)));
     }
 }

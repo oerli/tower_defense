@@ -7,7 +7,7 @@ use crate::player::resources::*;
 use crate::GameState;
 use crate::resources::*;
 
-pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
+pub fn setup_graphics(mut commands: Commands) {
     // add light
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
@@ -45,29 +45,35 @@ pub fn setup_graphics(mut commands: Commands, player: Res<Player>) {
         RapierPickable,
         SpatialListener::new(5.0),
     ));
-
-    // show player score
-    commands.spawn((
-        TextBundle::from_sections([
-            TextSection::new("Level: ", TextStyle::default()),
-            TextSection::new(format!("{}", player.level), TextStyle::default()),
-            TextSection::new(" Lives: ", TextStyle::default()),
-            TextSection::new(format!("{}", player.lives), TextStyle::default()),
-            TextSection::new(" Score: ", TextStyle::default()),
-            TextSection::new(format!("{}", player.score), TextStyle::default()),
-            TextSection::new(" Credits: ", TextStyle::default()),
-            TextSection::new(format!("{}", player.credits), TextStyle::default()),
-        ]),
-        PlayerText,
-    ));
 }
 
 pub fn setup_physics(mut commands: Commands) {
+
+    let heights = vec![
+             0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+             0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0,
+             0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0,
+             0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+         ];
+
     // create the ground
     commands.spawn((
-        Collider::cuboid(10.0, 0.2, 10.0),
+        // Collider::cuboid(10.0, 0.2, 10.0),
+        Collider::heightfield(heights, 16, 16, Vec3::new(16.0, 0.2, 16.0)),
         CollisionGroups::new(Group::GROUP_4, Group::all()),
-        TransformBundle::from(Transform::from_xyz(7.0, -0.6, 7.0)),
+        TransformBundle::from(Transform::from_xyz(7.5, 0.0, 7.5)),
     ));    
 }
 

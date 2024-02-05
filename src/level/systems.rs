@@ -39,23 +39,59 @@ pub fn setup_level(
         for defense_entity in query_defense.iter() {
             commands.entity(defense_entity).despawn_recursive();
         }
+        let heights = vec![
+            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+         ];
+        // for (x, z_line) in heights.iter().enumerate() {
+        //     for (z , height) in z_line.iter().enumerate() {
+        //         info!("{:?}", tile_type(&heights, x, z));
+
+        //     }
+        // }
 
         // create tiles
         let mut waypoints = Vec::new();
         for (x, z_line) in level.map.iter().enumerate() {
             for (z, path_index) in z_line.iter().enumerate() {
+                // select specific tile from sorrounding heights from the heights map
+
                 // create empty tiles
                 if *path_index == 0 {
                     commands
                         .spawn((
-                            SceneBundle {
-                                scene: asset_server.load("models/tile.glb#Scene0"),
-                                transform: Transform::from_xyz(x as f32, 0.0, z as f32),
-                                ..Default::default()
-                            },
+                            // SceneBundle {
+                            //     scene: asset_server.load(tile_type(x, z, false)),
+                            //     transform: Transform::from_xyz(
+                            //         x as f32,
+                            //         heights[x][z] * 0.2,
+                            //         z as f32,
+                            //     ),
+                            //     ..Default::default()
+                            // },
+                            TransformBundle::from_transform(Transform::from_xyz(
+                                x as f32,
+                                heights[x][z] * 0.2 - 0.1,
+                                z as f32,
+                            )),
+                            VisibilityBundle::default(),
                             PickableBundle::default(),
                             RapierPickable,
-                            Collider::cuboid(0.50, 0.2, 0.5),
+                            Collider::cuboid(0.50, 0.1, 0.5),
                             CollisionGroups::new(Group::GROUP_5, Group::GROUP_5),
                             On::<Pointer<Click>>::send_event::<BuildEvent>(),
                             On::<Pointer<Over>>::send_event::<OverEvent>(),
@@ -63,25 +99,34 @@ pub fn setup_level(
                             Tile,
                         ))
                         .with_children(|parent| {
+                            parent.spawn((SceneBundle {
+                                scene: asset_server.load(tile_type(x, z, false)),
+                                transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                                ..Default::default()
+                            },));
                             // create some trees or rocks
                             if 0.2 > rng.gen() {
                                 parent.spawn(SceneBundle {
                                     scene: asset_server.load("models/tree.glb#Scene0"),
-                                    transform: Transform::from_xyz(0.0, 0.2, 0.0)
+                                    transform: Transform::from_xyz(0.0, 0.1, 0.0)
                                         .with_scale(Vec3::splat(2.0)),
                                     ..Default::default()
                                 });
                             } else if 0.1 > rng.gen() {
                                 parent.spawn(SceneBundle {
                                     scene: asset_server.load("models/rocks.glb#Scene0"),
-                                    transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                                    transform: Transform::from_xyz(0.0, 0.1, 0.0),
                                     ..Default::default()
                                 });
                             }
                         });
                 } else {
                     // collect all waypoints
-                    waypoints.push((path_index, Vec3::new(x as f32, 0.0, z as f32)));
+                    waypoints.push((
+                        path_index,
+                        // 0.2 size of tiles + 0.5 of character offset
+                        Vec3::new(x as f32, heights[x][z] * 0.2 + 0.5, z as f32),
+                    ));
                 }
             }
         }
@@ -101,18 +146,36 @@ pub fn setup_level(
 
                 commands
                     .spawn((
-                        SceneBundle {
-                            scene: asset_server.load("models/tile_end.glb#Scene0"),
-                            transform: Transform::from_xyz(position.x, 0.0, position.z)
-                                .with_rotation(rotation),
-                            ..Default::default()
-                        },
+                        TransformBundle::from_transform(
+                            Transform::from_xyz(
+                                position.x,
+                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                position.z,
+                            )
+                            .with_rotation(rotation),
+                        ),
+                        VisibilityBundle::default(),
+                        // SceneBundle {
+                        //     scene: asset_server.load("models/tile_end.glb#Scene0"),
+                        //     transform: Transform::from_xyz(
+                        //         position.x,
+                        //         heights[position.x as usize][position.z as usize] * 0.2-0.2,
+                        //         position.z,
+                        //     )
+                        //     .with_rotation(rotation),
+                        //     ..Default::default()
+                        // },
                         Tile,
                     ))
                     .with_children(|parent| {
                         parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/tile_end.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                            ..Default::default()
+                        });
+                        parent.spawn(SceneBundle {
                             scene: asset_server.load("models/arc.glb#Scene0"),
-                            transform: Transform::from_xyz(0.0, 0.2, 0.0),
+                            transform: Transform::from_xyz(0.0, 0.1, 0.0),
                             ..Default::default()
                         });
                     });
@@ -126,23 +189,31 @@ pub fn setup_level(
 
                 commands
                     .spawn((
-                        SceneBundle {
-                            scene: asset_server.load("models/tile_end.glb#Scene0"),
-                            transform: Transform::from_xyz(position.x, 0.0, position.z)
-                                .with_rotation(rotation),
-                            ..Default::default()
-                        },
+                        TransformBundle::from_transform(
+                            Transform::from_xyz(
+                                position.x,
+                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                position.z,
+                            )
+                            .with_rotation(rotation),
+                        ),
+                        VisibilityBundle::default(),
                         Tile,
                     ))
                     .with_children(|parent| {
                         parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/tile_end.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                            ..Default::default()
+                        });
+                        parent.spawn(SceneBundle {
                             scene: asset_server.load("models/arc.glb#Scene0"),
-                            transform: Transform::from_xyz(0.0, 0.2, -0.6),
+                            transform: Transform::from_xyz(0.0, 0.1, -0.4),
                             ..Default::default()
                         });
                         parent.spawn(SceneBundle {
                             scene: asset_server.load("models/banner.glb#Scene0"),
-                            transform: Transform::from_xyz(0.0, 0.2, -0.2),
+                            transform: Transform::from_xyz(0.0, 0.1, 0.0),
                             ..Default::default()
                         });
                     });
@@ -162,26 +233,35 @@ pub fn setup_level(
                     || backward_direction.z == forward_direction.z
                 {
                     let rotation = Quat::from_rotation_y(forward_rotation_angle);
-                    commands
-                        .spawn((
-                            SceneBundle {
-                                scene: asset_server.load("models/tile_straight.glb#Scene0"),
-                                transform: Transform::from_xyz(position.x, 0.0, position.z)
-                                    .with_rotation(rotation),
-                                ..Default::default()
-                            },
-                            Tile,
-                        ))
-                        .with_children(|parent| {
-                            // create some dirt on street
-                            if 0.3 > rng.gen() {
-                                parent.spawn(SceneBundle {
-                                    scene: asset_server.load("models/dirt.glb#Scene0"),
-                                    transform: Transform::from_xyz(0.0, 0.1, 0.0),
-                                    ..Default::default()
-                                });
-                            }
+                    commands.spawn((
+                        TransformBundle::from_transform(
+                            Transform::from_xyz(
+                                position.x,
+                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                position.z,
+                            ).with_rotation(rotation),
+                        ),
+                        VisibilityBundle::default(),
+                        Tile,
+                    )).with_children(|parent| {
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load(tile_type(
+                                position.x as usize,
+                                position.z as usize,
+                                true,
+                            )),
+                            transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                            ..Default::default()
                         });
+                        // create some dirt on street
+                        if 0.3 > rng.gen() {
+                            parent.spawn(SceneBundle {
+                                scene: asset_server.load("models/dirt.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                                ..Default::default()
+                            });
+                        }
+                    });
                 } else {
                     // calculate the rotation of a corner tile from last, current and next tile
                     // todo: review if there would be any better option
@@ -205,19 +285,36 @@ pub fn setup_level(
                         Quat::from_rotation_y(rotation_angle + PI / 2.0)
                     };
 
-                    commands.spawn((
-                        SceneBundle {
-                            scene: asset_server.load("models/tile_corner.glb#Scene0"),
-                            transform: Transform::from_xyz(position.x, 0.0, position.z)
-                                .with_rotation(rotation),
-                            ..Default::default()
-                        },
-                        Tile,
-                    ));
+                    commands
+                        .spawn((
+                            // SceneBundle {
+                            //     scene: asset_server.load("models/tile_corner.glb#Scene0"),
+                            //     transform: Transform::from_xyz(
+                            //         position.x,
+                            //         heights[position.x as usize][position.z as usize] * 0.2,
+                            //         position.z,
+                            //     )
+                            //     .with_rotation(rotation),
+                            //     ..Default::default()
+                            // },
+                            TransformBundle::from_transform(Transform::from_xyz(
+                                position.x,
+                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                position.z,
+                            ).with_rotation(rotation)),
+                            VisibilityBundle::default(),
+                            Tile,
+                        ))
+                        .with_children(|parent| {
+                            parent.spawn(SceneBundle {
+                                scene: asset_server.load("models/tile_corner.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                                ..Default::default()
+                            });
+                        });
                 }
             }
         }
-
 
         // collect all positions from waypoints
         let mut waypoints_level = Vec::new();
@@ -343,4 +440,64 @@ pub fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
         // jumping animation
         asset_server.load("models/orc.glb#Animation5"),
     ]));
+}
+
+#[derive(Debug)]
+enum TileType {
+    Corner,
+    Edge,
+    Flat,
+}
+
+fn tile_type(x: usize, z: usize, path: bool) -> String {
+    let heights = vec![
+            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+         ];
+        // check if the current element is on a corner
+    if (x == 0 || x == heights.len() - 1) && (z == 0 || z == heights[x].len() - 1) {
+        return "models/outer_corner.glb#Scene0".to_string();
+
+        // return TileType::Corner;
+    }
+
+    // check if the current element is on an edge
+    if x == 0 || x == heights.len() - 1 || z == 0 || z == heights[x].len() - 1 {
+        return "models/slope.glb#Scene0".to_string();
+        // return TileType::Edge;
+    }
+
+    // check if the height is changeing
+    if heights[x][z] != heights[x][z + 1]
+        || heights[x][z] != heights[x + 1][z]
+        || heights[x][z] != heights[x + 1][z + 1]
+    {
+        // return TileType::Edge;
+        if path {
+            return "models/tile_slope.glb#Scene0".to_string();
+        } else {
+            return "models/slope.glb#Scene0".to_string();
+        }
+    }
+
+    // TileType::Flat
+    if path {
+        return "models/tile_straight.glb#Scene0".to_string();
+    } else {
+        return "models/tile.glb#Scene0".to_string();
+    }
 }

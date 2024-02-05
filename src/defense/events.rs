@@ -48,13 +48,11 @@ pub fn spawn_defense(
             Weapon::Cannon => {
                 // spawn the defense
                 transform_query.get(event.entity).ok().map(|transform| {
+                    info!("{:?}", transform.translation());
                     commands
                         .spawn((
-                            SceneBundle {
-                                scene: asset_server.load("models/cannon_tower.glb#Scene0"),
-                                transform: transform.clone().into(),
-                                ..Default::default()
-                            },
+                            VisibilityBundle::default(),
+                            TransformBundle::from_transform(Transform::from_translation(transform.translation()+Vec3::new(0.0, 0.2, 0.0))),
                             RigidBody::Dynamic,
                             Defense {
                                 damage: 0.5,
@@ -66,6 +64,12 @@ pub fn spawn_defense(
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
                         ))
                         .with_children(|parent| {
+                            parent.spawn((SceneBundle {
+                                scene: asset_server.load("models/cannon_tower.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, -0.5, 0.0),
+                                ..Default::default()
+                            },));
+
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
@@ -76,7 +80,7 @@ pub fn spawn_defense(
                             parent.spawn((
                                 SceneBundle {
                                     scene: asset_server.load("models/cannon.glb#Scene0"),
-                                    transform: Transform::from_xyz(0.0, 0.68, 0.0),
+                                    transform: Transform::from_xyz(0.0, 0.18, 0.0),
                                     ..Default::default()
                                 },
                                 Weapon::Cannon,
@@ -89,11 +93,8 @@ pub fn spawn_defense(
                 transform_query.get(event.entity).ok().map(|transform| {
                     commands
                         .spawn((
-                            SceneBundle {
-                                scene: asset_server.load("models/ballista_tower.glb#Scene0"),
-                                transform: transform.clone().into(),
-                                ..Default::default()
-                            },
+                            VisibilityBundle::default(),
+                            TransformBundle::from_transform(Transform::from_translation(transform.translation())),
                             RigidBody::Dynamic,
                             Defense {
                                 damage: 0.3,
@@ -105,6 +106,10 @@ pub fn spawn_defense(
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
                         ))
                         .with_children(|parent| {
+                            parent.spawn(SceneBundle {
+                                scene: asset_server.load("models/ballista_tower.glb#Scene0"),
+                                ..Default::default()
+                            },);
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
@@ -128,11 +133,8 @@ pub fn spawn_defense(
                 transform_query.get(event.entity).ok().map(|transform| {
                     commands
                         .spawn((
-                            SceneBundle {
-                                scene: asset_server.load("models/archer_tower.glb#Scene0"),
-                                transform: transform.clone().into(),
-                                ..Default::default()
-                            },
+                            VisibilityBundle::default(),
+                            TransformBundle::from_transform(Transform::from_translation(transform.translation())),
                             RigidBody::Dynamic,
                             Defense {
                                 damage: 0.1,
@@ -145,6 +147,10 @@ pub fn spawn_defense(
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
                         ))
                         .with_children(|parent| {
+                            parent.spawn(SceneBundle {
+                                scene: asset_server.load("models/archer_tower.glb#Scene0"),
+                                ..Default::default()
+                            },);
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),

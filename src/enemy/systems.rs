@@ -2,7 +2,8 @@ use std::f32::consts::PI;
 use std::time::Duration;
 
 use bevy::animation::RepeatAnimation;
-use bevy::prelude::*;
+use bevy::{prelude::*, time};
+use bevy_rapier3d::na::Translation;
 use bevy_rapier3d::prelude::*;
 
 use crate::level::resources::*;
@@ -17,9 +18,10 @@ pub fn enemy_movement(
     mut query: Query<(
         Entity,
         &mut Enemy,
-        &mut Velocity,
+        // &mut Velocity,
         &GlobalTransform,
         &mut Transform,
+        &mut KinematicCharacterController,
     )>,
     current_level: Res<CurrentLevel>,
     mut player: ResMut<Player>,
@@ -28,25 +30,31 @@ pub fn enemy_movement(
     children: Query<&Children>,
     music_controller: Query<&SpatialAudioSink>,
     mut next_game_state: ResMut<NextState<GameState>>,
+    time: Res<Time>,
 ) {
     if let Some(level) = &current_level.level {
-        for (entity, mut enemy, mut velocity, position, mut transform) in query.iter_mut() {
+        for (entity, mut enemy, position, mut transform, mut controller) in query.iter_mut() {
             if let Some(waypoints) = &level.waypoints {
                 if enemy.waypoint < waypoints.len() && enemy.health > 0.0 {
-                    transform.look_at(waypoints[enemy.waypoint], Vec3::ZERO);
-                    // TODO: dirty hack to rotate the enemy 180 degrees
-                    transform.rotate(Quat::from_rotation_y(PI));
+                    // coordinates of the next waypoint and height of the enemy to look straight
+                    transform.look_at(waypoints[enemy.waypoint], Vec3::Y);
 
-                    let mut direction = waypoints[enemy.waypoint] - position.translation();
-                    direction.y = 0.0;
-                    let distance = direction.length();
+                    let direction = waypoints[enemy.waypoint]  - position.translation();
+                    let movement = direction.normalize() * enemy.speed * 4.0 * time.delta_seconds();
 
-                    if distance < 1.0 {
+                    // check if enemy reached waypoint
+                    if direction.length() < 0.1 {
                         enemy.waypoint += 1;
                     } else {
-                        direction = direction.normalize();
-                        velocity.linvel += direction * enemy.speed;
+                        // direction = direction.normalize();
+                        // velocity.linvel += direction * enemy.speed * 0.5;
+                        // controller.translation = Some(direction * enemy.speed * 2.0);
+                        // controller.translation = Some(waypoints[enemy.waypoint]);
+                        controller.translation = Some(movement);
+                        // info!("{:?}", direction);
                     }
+                    
+                    
                 } else if enemy.health > 0.0 {
                     // enemy reached goal
                     player.lives -= 1;
