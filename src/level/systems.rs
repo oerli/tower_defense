@@ -1,6 +1,7 @@
 use std::f32::consts::PI;
 
 use bevy::prelude::*;
+use bevy::utils::info;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
 
@@ -101,7 +102,7 @@ pub fn setup_level(
                         .with_children(|parent| {
                             parent.spawn((SceneBundle {
                                 scene: asset_server.load(tile_type(x, z, false)),
-                                transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                                transform: Transform::from_xyz(0.0, -0.1, 0.0).with_rotation(tile_rotaton(x, z)),
                                 ..Default::default()
                             },));
                             // create some trees or rocks
@@ -232,7 +233,12 @@ pub fn setup_level(
                 if backward_direction.x == forward_direction.x
                     || backward_direction.z == forward_direction.z
                 {
-                    let rotation = Quat::from_rotation_y(forward_rotation_angle);
+                    let rotation = if tile_rotaton(position.x as usize, position.z as usize) != Quat::default() {
+                        tile_rotaton(position.x as usize, position.z as usize)
+                    } else {
+                        Quat::from_rotation_y(forward_rotation_angle)
+                    };
+                    // let rotation = Quat::from_rotation_y(forward_rotation_angle);
                     commands.spawn((
                         TransformBundle::from_transform(
                             Transform::from_xyz(
@@ -442,13 +448,6 @@ pub fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     ]));
 }
 
-#[derive(Debug)]
-enum TileType {
-    Corner,
-    Edge,
-    Flat,
-}
-
 fn tile_type(x: usize, z: usize, path: bool) -> String {
     let heights = vec![
             [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
@@ -469,23 +468,24 @@ fn tile_type(x: usize, z: usize, path: bool) -> String {
             [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
          ];
         // check if the current element is on a corner
-    if (x == 0 || x == heights.len() - 1) && (z == 0 || z == heights[x].len() - 1) {
+    if (z == 0 || z == heights.len() - 1) && (x == 0 || x == heights[z].len() - 1) {
         return "models/outer_corner.glb#Scene0".to_string();
 
         // return TileType::Corner;
     }
 
     // check if the current element is on an edge
-    if x == 0 || x == heights.len() - 1 || z == 0 || z == heights[x].len() - 1 {
+    if x == 0 || z == heights.len() - 1 || z == 0 || x == heights[z].len() - 1 {
         return "models/slope.glb#Scene0".to_string();
         // return TileType::Edge;
     }
 
-    // check if the height is changeing
-    if heights[x][z] != heights[x][z + 1]
-        || heights[x][z] != heights[x + 1][z]
-        || heights[x][z] != heights[x + 1][z + 1]
-    {
+
+    // slopes on the z axis
+    if  heights[z][x] < heights[z + 1][x] || heights[z][x] < heights[z - 1][x] ||
+        // slopes on the x axis
+        heights[z][x] < heights[z][x + 1] || heights[z][x] < heights[z][x - 1]
+        {
         // return TileType::Edge;
         if path {
             return "models/tile_slope.glb#Scene0".to_string();
@@ -494,10 +494,104 @@ fn tile_type(x: usize, z: usize, path: bool) -> String {
         }
     }
 
+    // corner in field
+    if (heights[z][x] < heights[z+1][x+1]) || (heights[z][x] < heights[z-1][x+1]) || (heights[z][x] < heights[z+1][x-1] || heights[z][x] < heights[z-1][x-1]) {
+        return "models/outer_corner.glb#Scene0".to_string();
+    }
+
     // TileType::Flat
     if path {
         return "models/tile_straight.glb#Scene0".to_string();
     } else {
         return "models/tile.glb#Scene0".to_string();
     }
+}
+
+// todo: optimize this
+fn tile_rotaton(x: usize, z: usize) -> Quat {
+    let heights = vec![
+            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
+            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
+         ];
+    // check if the current element is a corner on the edge of the field
+    if z == 0  && x == heights[z].len() - 1 {
+        return Quat::from_rotation_y(0.0);
+    }
+
+    if x == 0  && z == 0  {
+        return Quat::from_rotation_y( PI / 2.0);
+    }
+    if z == heights.len() - 1 && x == 0  {
+        return Quat::from_rotation_y(PI);
+    }
+
+    if z == heights.len() - 1 && x == heights[z].len() - 1 {
+        return Quat::from_rotation_y(-PI / 2.0);
+    }
+
+
+    // outer side
+    if x == 0  {
+        return Quat::from_rotation_y(PI /2.0);
+    }
+
+    if z == 0 {
+        return Quat::from_rotation_y(0.0);
+    }
+
+    if x == heights[z].len() - 1 {
+        return Quat::from_rotation_y( -PI / 2.0);
+    }
+
+    if z == heights.len() - 1  {
+        return Quat::from_rotation_y(PI);
+    }
+
+    // inner slopes
+    if heights[z][x] < heights[z+1][x] {
+        return Quat::from_rotation_y(0.0);
+    }
+
+    if heights[z][x] < heights[z-1][x] {
+        
+        return Quat::from_rotation_y(PI);
+    }
+
+    if heights[z][x] < heights[z][x + 1] {
+        return Quat::from_rotation_y(PI/2.0);
+    }
+
+    if heights[z][x] < heights[z][x - 1] {
+        return Quat::from_rotation_y(-PI/2.0);
+    }
+
+    // corners in field
+    if heights[z][x] < heights[z+1][x+1] {
+        return Quat::from_rotation_y( PI / 2.0);
+    }
+    if heights[z][x] < heights[z-1][x+1] {
+        return Quat::from_rotation_y(PI);
+    }
+    if heights[z][x] < heights[z+1][x-1] {
+        return Quat::from_rotation_y(0.0);
+    }
+    if heights[z][x] < heights[z-1][x-1] {
+        return Quat::from_rotation_y(-PI / 2.0);
+    }
+
+    return Quat::from_rotation_y(0.0);
 }

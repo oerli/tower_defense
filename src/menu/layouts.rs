@@ -199,7 +199,7 @@ pub fn high_scores(mut contexts: EguiContexts, player: Res<Player>) {
         });
 }
 
-pub fn show_pause(
+pub fn show_controls(
     mut contexts: EguiContexts,
     mut next_game_state: ResMut<NextState<GameState>>,
     asset_server: Res<AssetServer>,
