@@ -22,24 +22,21 @@ pub fn bullet_expired(
 
 pub fn hit_enemy(
     mut commands: Commands,
-    mut enemy_query: Query<&mut Enemy>,
+    mut enemy_query: Query<(Entity, &mut Enemy)>,
     bullet_query: Query<(Entity, &Bullet)>,
     rapier_context: Res<RapierContext>,
 ) {
     for (bullet_entity, bullet) in bullet_query.iter() {
-        for collider_pair in rapier_context.contacts_with(bullet_entity) {
-            let other_entity = if collider_pair.collider1() == bullet_entity {
-                collider_pair.collider2()
-            } else {
-                collider_pair.collider1()
-            };
+        for (enemy_entity, mut enemy) in enemy_query.iter_mut() {
+            // check if bullet hits enemy
+            if let Some(contact_pair) = rapier_context.contact_pair(bullet_entity, enemy_entity) {
+                if contact_pair.has_any_active_contacts() {
+                    enemy.health -= bullet.damage;
+                    commands.entity(bullet_entity).despawn_recursive();
 
-            if let Ok(mut enemy) = enemy_query.get_mut(other_entity) {
-                enemy.health -= bullet.damage;
-                commands.entity(bullet_entity).despawn_recursive();
-
-                // only count first hit on an enemy
-                break;
+                    // only count first hit on an enemy
+                    break;
+                }
             }
         }
     }

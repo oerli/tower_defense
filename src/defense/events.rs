@@ -48,19 +48,20 @@ pub fn spawn_defense(
             Weapon::Cannon => {
                 // spawn the defense
                 transform_query.get(event.entity).ok().map(|transform| {
-                    info!("{:?}", transform.translation());
                     commands
                         .spawn((
                             VisibilityBundle::default(),
-                            TransformBundle::from_transform(Transform::from_translation(transform.translation()+Vec3::new(0.0, 0.2, 0.0))),
-                            RigidBody::Dynamic,
+                            TransformBundle::from_transform(Transform::from_translation(
+                                transform.translation() + Vec3::new(0.0, 0.5, 0.0),
+                            )),
+                            RigidBody::Fixed,   
                             Defense {
                                 damage: 0.5,
                                 shooting_timer: Timer::from_seconds(1.0, TimerMode::Repeating),
                                 targets: VecDeque::new(),
                             },
-                            Collider::ball(3.0),
                             Sensor,
+                            Collider::ball(3.0),
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
                         ))
                         .with_children(|parent| {
@@ -94,22 +95,25 @@ pub fn spawn_defense(
                     commands
                         .spawn((
                             VisibilityBundle::default(),
-                            TransformBundle::from_transform(Transform::from_translation(transform.translation())),
-                            RigidBody::Dynamic,
+                            TransformBundle::from_transform(Transform::from_translation(
+                                transform.translation() + Vec3::new(0.0, 0.5, 0.0),
+                            )),
+                            RigidBody::Fixed,
                             Defense {
                                 damage: 0.3,
                                 shooting_timer: Timer::from_seconds(0.5, TimerMode::Repeating),
                                 targets: VecDeque::new(),
                             },
-                            Collider::ball(3.0),
                             Sensor,
+                            Collider::ball(3.0),
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
                         ))
                         .with_children(|parent| {
                             parent.spawn(SceneBundle {
                                 scene: asset_server.load("models/ballista_tower.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, -0.5, 0.0),
                                 ..Default::default()
-                            },);
+                            });
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
@@ -120,7 +124,7 @@ pub fn spawn_defense(
                             parent.spawn((
                                 SceneBundle {
                                     scene: asset_server.load("models/ballista.glb#Scene0"),
-                                    transform: Transform::from_xyz(0.0, 0.83, 0.0),
+                                    transform: Transform::from_xyz(0.0, 0.33, 0.0),
                                     ..Default::default()
                                 },
                                 Weapon::Ballista,
@@ -134,23 +138,26 @@ pub fn spawn_defense(
                     commands
                         .spawn((
                             VisibilityBundle::default(),
-                            TransformBundle::from_transform(Transform::from_translation(transform.translation())),
-                            RigidBody::Dynamic,
+                            TransformBundle::from_transform(Transform::from_translation(
+                                transform.translation() + Vec3::new(0.0, 0.5, 0.0),
+                            )),
+                            RigidBody::Fixed,
                             Defense {
                                 damage: 0.1,
                                 shooting_timer: Timer::from_seconds(0.2, TimerMode::Repeating),
                                 targets: VecDeque::new(),
                             },
+                            Sensor,
                             // with collidr 2.0 enemy will leave range instatnly
                             Collider::ball(2.1),
-                            Sensor,
                             CollisionGroups::new(Group::GROUP_2, Group::GROUP_3),
                         ))
                         .with_children(|parent| {
                             parent.spawn(SceneBundle {
                                 scene: asset_server.load("models/archer_tower.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, -0.5, 0.0),
                                 ..Default::default()
-                            },);
+                            });
                             parent.spawn((
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
@@ -247,7 +254,6 @@ pub fn range_event(
                                     base_color: Color::rgb(0.8, 0.2, 0.2),
                                     ..Default::default()
                                 }),
-                                transform: Transform::from_translation(Vec3::new(0.0, 0.3, 0.0)),
                                 ..Default::default()
                             },
                             DefenseRange,

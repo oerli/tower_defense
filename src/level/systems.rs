@@ -1,7 +1,6 @@
 use std::f32::consts::PI;
 
 use bevy::prelude::*;
-use bevy::utils::info;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
 
@@ -125,7 +124,6 @@ pub fn setup_level(
                     // collect all waypoints
                     waypoints.push((
                         path_index,
-                        // 0.2 size of tiles + 0.5 of character offset
                         Vec3::new(x as f32, heights[x][z] * 0.2 + 0.5, z as f32),
                     ));
                 }

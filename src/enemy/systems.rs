@@ -1,9 +1,8 @@
-use std::f32::consts::PI;
 use std::time::Duration;
 
 use bevy::animation::RepeatAnimation;
-use bevy::{prelude::*, time};
-use bevy_rapier3d::na::Translation;
+use bevy::prelude::*;
+
 use bevy_rapier3d::prelude::*;
 
 use crate::level::resources::*;
@@ -18,10 +17,9 @@ pub fn enemy_movement(
     mut query: Query<(
         Entity,
         &mut Enemy,
-        // &mut Velocity,
         &GlobalTransform,
         &mut Transform,
-        &mut KinematicCharacterController,
+        // &mut KinematicCharacterController,
     )>,
     current_level: Res<CurrentLevel>,
     mut player: ResMut<Player>,
@@ -33,25 +31,22 @@ pub fn enemy_movement(
     time: Res<Time>,
 ) {
     if let Some(level) = &current_level.level {
-        for (entity, mut enemy, position, mut transform, mut controller) in query.iter_mut() {
+        for (entity, mut enemy, position, mut transform) in query.iter_mut() {
             if let Some(waypoints) = &level.waypoints {
                 if enemy.waypoint < waypoints.len() && enemy.health > 0.0 {
-                    // coordinates of the next waypoint and height of the enemy to look straight
-                    transform.look_at(waypoints[enemy.waypoint], Vec3::Y);
-
-                    let direction = waypoints[enemy.waypoint]  - position.translation();
+                    // add 0.5 character offset
+                    let direction = waypoints[enemy.waypoint] - position.translation();
                     let movement = direction.normalize() * enemy.speed * 4.0 * time.delta_seconds();
+
+                    // coordinates of the next waypoint and height of the enemy to look straight
+                    transform.look_to(direction.normalize(), Vec3::Y);
 
                     // check if enemy reached waypoint
                     if direction.length() < 0.1 {
                         enemy.waypoint += 1;
                     } else {
-                        // direction = direction.normalize();
-                        // velocity.linvel += direction * enemy.speed * 0.5;
-                        // controller.translation = Some(direction * enemy.speed * 2.0);
-                        // controller.translation = Some(waypoints[enemy.waypoint]);
-                        controller.translation = Some(movement);
-                        // info!("{:?}", direction);
+                        transform.translation += movement;
+                        // controller.translation = Some(movement);
                     }
                     
                     
