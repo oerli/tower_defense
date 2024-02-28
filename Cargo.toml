@@ -18,4 +18,3 @@ bevy-inspector-egui = "0.22"
 bevy_egui = "0.24"
 bevy_common_assets = { version = "0.9", features = ["toml"] }
 serde = "1.0"
-oxidized_navigation = { version = "0.9", features = ["debug_draw", "rapier"] }

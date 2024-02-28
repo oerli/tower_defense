@@ -3,8 +3,6 @@ use std::f32::consts::PI;
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_rapier3d::prelude::*;
-use oxidized_navigation::NavMesh;
-use oxidized_navigation::{NavMeshAffector};
 
 use rand::Rng;
 
@@ -76,15 +74,6 @@ pub fn setup_level(
                 if *path_index == 0 {
                     commands
                         .spawn((
-                            // SceneBundle {
-                            //     scene: asset_server.load(tile_type(x, z, false)),
-                            //     transform: Transform::from_xyz(
-                            //         x as f32,
-                            //         heights[x][z] * 0.2,
-                            //         z as f32,
-                            //     ),
-                            //     ..Default::default()
-                            // },
                             TransformBundle::from_transform(Transform::from_xyz(
                                 x as f32,
                                 heights[x][z] * 0.2 - 0.1,
@@ -92,36 +81,35 @@ pub fn setup_level(
                             )),
                             VisibilityBundle::default(),
                             PickableBundle::default(),
-                            RapierPickable,
-                            Collider::cuboid(0.5, 0.75, 0.5),
+                            RapierPickable::default(),
+                            Collider::cuboid(0.5, 0.1, 0.5),
                             CollisionGroups::new(Group::GROUP_5, Group::GROUP_5),
                             On::<Pointer<Click>>::send_event::<BuildEvent>(),
                             On::<Pointer<Over>>::send_event::<OverEvent>(),
                             // On::<Pointer<Out>>::send_event::<OutEvent>(),
                             Tile,
-                            NavMeshAffector,
                         ))
                         .with_children(|parent| {
-                            // parent.spawn((SceneBundle {
-                            //     scene: asset_server.load(tile_type(x, z, false)),
-                            //     transform: Transform::from_xyz(0.0, -0.1, 0.0).with_rotation(tile_rotaton(x, z)),
-                            //     ..Default::default()
-                            // },));
-                            // // create some trees or rocks
-                            // if 0.2 > rng.gen() {
-                            //     parent.spawn(SceneBundle {
-                            //         scene: asset_server.load("models/tree.glb#Scene0"),
-                            //         transform: Transform::from_xyz(0.0, 0.1, 0.0)
-                            //             .with_scale(Vec3::splat(2.0)),
-                            //         ..Default::default()
-                            //     });
-                            // } else if 0.1 > rng.gen() {
-                            //     parent.spawn(SceneBundle {
-                            //         scene: asset_server.load("models/rocks.glb#Scene0"),
-                            //         transform: Transform::from_xyz(0.0, 0.1, 0.0),
-                            //         ..Default::default()
-                            //     });
-                            // }
+                            parent.spawn((SceneBundle {
+                                scene: asset_server.load(tile_type(x, z, false)),
+                                transform: Transform::from_xyz(0.0, -0.1, 0.0).with_rotation(tile_rotaton(x, z)),
+                                ..Default::default()
+                            },));
+                            // create some trees or rocks
+                            if 0.2 > rng.gen() {
+                                parent.spawn(SceneBundle {
+                                    scene: asset_server.load("models/tree.glb#Scene0"),
+                                    transform: Transform::from_xyz(0.0, 0.1, 0.0)
+                                        .with_scale(Vec3::splat(2.0)),
+                                    ..Default::default()
+                                });
+                            } else if 0.1 > rng.gen() {
+                                parent.spawn(SceneBundle {
+                                    scene: asset_server.load("models/rocks.glb#Scene0"),
+                                    transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                                    ..Default::default()
+                                });
+                            }
                         });
                 } else {
                     // collect all waypoints
@@ -157,29 +145,19 @@ pub fn setup_level(
                             .with_rotation(rotation),
                         ),
                         VisibilityBundle::default(),
-                        // SceneBundle {
-                        //     scene: asset_server.load("models/tile_end.glb#Scene0"),
-                        //     transform: Transform::from_xyz(
-                        //         position.x,
-                        //         heights[position.x as usize][position.z as usize] * 0.2-0.2,
-                        //         position.z,
-                        //     )
-                        //     .with_rotation(rotation),
-                        //     ..Default::default()
-                        // },
                         Tile,
                     ))
                     .with_children(|parent| {
-                        // parent.spawn(SceneBundle {
-                        //     scene: asset_server.load("models/tile_end.glb#Scene0"),
-                        //     transform: Transform::from_xyz(0.0, -0.1, 0.0),
-                        //     ..Default::default()
-                        // });
-                        // parent.spawn(SceneBundle {
-                        //     scene: asset_server.load("models/arc.glb#Scene0"),
-                        //     transform: Transform::from_xyz(0.0, 0.1, 0.0),
-                        //     ..Default::default()
-                        // });
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/tile_end.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                            ..Default::default()
+                        });
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/arc.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                            ..Default::default()
+                        });
                     });
             // check if it's last tile
             } else if index == waypoints.len() - 1 {
@@ -203,21 +181,21 @@ pub fn setup_level(
                         Tile,
                     ))
                     .with_children(|parent| {
-                        // parent.spawn(SceneBundle {
-                        //     scene: asset_server.load("models/tile_end.glb#Scene0"),
-                        //     transform: Transform::from_xyz(0.0, -0.1, 0.0),
-                        //     ..Default::default()
-                        // });
-                        // parent.spawn(SceneBundle {
-                        //     scene: asset_server.load("models/arc.glb#Scene0"),
-                        //     transform: Transform::from_xyz(0.0, 0.1, -0.4),
-                        //     ..Default::default()
-                        // });
-                        // parent.spawn(SceneBundle {
-                        //     scene: asset_server.load("models/banner.glb#Scene0"),
-                        //     transform: Transform::from_xyz(0.0, 0.1, 0.0),
-                        //     ..Default::default()
-                        // });
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/tile_end.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                            ..Default::default()
+                        });
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/arc.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, 0.1, -0.4),
+                            ..Default::default()
+                        });
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load("models/banner.glb#Scene0"),
+                            transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                            ..Default::default()
+                        });
                     });
             } else {
                 // if not first or last tile, indicies must exist
@@ -251,23 +229,23 @@ pub fn setup_level(
                         VisibilityBundle::default(),
                         Tile,
                     )).with_children(|parent| {
-                        // parent.spawn(SceneBundle {
-                        //     scene: asset_server.load(tile_type(
-                        //         position.x as usize,
-                        //         position.z as usize,
-                        //         true,
-                        //     )),
-                        //     transform: Transform::from_xyz(0.0, -0.1, 0.0),
-                        //     ..Default::default()
-                        // });
-                        // // create some dirt on street
-                        // if 0.3 > rng.gen() {
-                        //     parent.spawn(SceneBundle {
-                        //         scene: asset_server.load("models/dirt.glb#Scene0"),
-                        //         transform: Transform::from_xyz(0.0, 0.1, 0.0),
-                        //         ..Default::default()
-                        //     });
-                        // }
+                        parent.spawn(SceneBundle {
+                            scene: asset_server.load(tile_type(
+                                position.x as usize,
+                                position.z as usize,
+                                true,
+                            )),
+                            transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                            ..Default::default()
+                        });
+                        // create some dirt on street
+                        if 0.3 > rng.gen() {
+                            parent.spawn(SceneBundle {
+                                scene: asset_server.load("models/dirt.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                                ..Default::default()
+                            });
+                        }
                     });
                 } else {
                     // calculate the rotation of a corner tile from last, current and next tile
@@ -294,16 +272,6 @@ pub fn setup_level(
 
                     commands
                         .spawn((
-                            // SceneBundle {
-                            //     scene: asset_server.load("models/tile_corner.glb#Scene0"),
-                            //     transform: Transform::from_xyz(
-                            //         position.x,
-                            //         heights[position.x as usize][position.z as usize] * 0.2,
-                            //         position.z,
-                            //     )
-                            //     .with_rotation(rotation),
-                            //     ..Default::default()
-                            // },
                             TransformBundle::from_transform(Transform::from_xyz(
                                 position.x,
                                 heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
@@ -313,11 +281,11 @@ pub fn setup_level(
                             Tile,
                         ))
                         .with_children(|parent| {
-                            // parent.spawn(SceneBundle {
-                            //     scene: asset_server.load("models/tile_corner.glb#Scene0"),
-                            //     transform: Transform::from_xyz(0.0, -0.1, 0.0),
-                            //     ..Default::default()
-                            // });
+                            parent.spawn(SceneBundle {
+                                scene: asset_server.load("models/tile_corner.glb#Scene0"),
+                                transform: Transform::from_xyz(0.0, -0.1, 0.0),
+                                ..Default::default()
+                            });
                         });
                 }
             }

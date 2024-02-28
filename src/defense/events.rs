@@ -75,7 +75,7 @@ pub fn spawn_defense(
                                 Collider::cuboid(0.5, 0.5, 0.5),
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
                                 PickableBundle::default(),
-                                RapierPickable,
+                                RapierPickable::default(),
                                 On::<Pointer<Click>>::send_event::<RangeEvent>(),
                             ));
                             parent.spawn((
@@ -119,7 +119,7 @@ pub fn spawn_defense(
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
                                 On::<Pointer<Click>>::send_event::<RangeEvent>(),
                                 PickableBundle::default(),
-                                RapierPickable,
+                                RapierPickable::default(),
                             ));
                             parent.spawn((
                                 SceneBundle {
@@ -163,7 +163,7 @@ pub fn spawn_defense(
                                 CollisionGroups::new(Group::GROUP_2, Group::GROUP_4),
                                 On::<Pointer<Click>>::send_event::<RangeEvent>(),
                                 PickableBundle::default(),
-                                RapierPickable,
+                                RapierPickable::default(),
                             ));
                             parent.spawn((
                                 // weapon shoots and needs transform

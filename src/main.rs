@@ -4,9 +4,6 @@ use bevy_panorbit_camera::PanOrbitCameraPlugin;
 use bevy_rapier3d::prelude::*;
 // use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_egui::EguiPlugin;
-use oxidized_navigation::{
-    debug_draw::OxidizedNavigationDebugDrawPlugin, OxidizedNavigationPlugin, NavMeshSettings,
-};
 
 mod components;
 pub mod events;
@@ -43,26 +40,9 @@ fn main() {
         .add_plugins(
             DefaultPickingPlugins
                 .build()
-                .disable::<RaycastBackend>()
-                .disable::<DebugPickingPlugin>(),
+                // .disable::<RaycastBackend>()
+                // .disable::<DebugPickingPlugin>(),
         )
-        .add_plugins(OxidizedNavigationPlugin::<Collider>::new(NavMeshSettings {
-            cell_width: 0.25,
-            cell_height: 0.1,
-            tile_width: 100,
-            world_half_extents: 250.0,
-            world_bottom_bound: -100.0,
-            max_traversable_slope_radians: (40.0_f32 - 0.1).to_radians(),
-            walkable_height: 20,
-            walkable_radius: 1,
-            step_height: 3,
-            min_region_area: 100,
-            merge_region_area: 500,
-            max_contour_simplification_error: 1.1,
-            max_edge_length: 80,
-            max_tile_generation_tasks: Some(9),
-        }))
-        .add_plugins(OxidizedNavigationDebugDrawPlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(EnemyPlugin)
         .add_plugins(DefensePlugin)
@@ -87,7 +67,6 @@ fn main() {
         .add_systems(Startup, setup_physics)
         .add_systems(Update, update_text)
         .add_systems(Update, change_game_state)
-        .add_systems(Update, run_blocking_pathfinding)
         .add_systems(Update, play_animations.run_if(in_state(GameState::Playing)))
         .run();
 }
