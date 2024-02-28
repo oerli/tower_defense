@@ -35,7 +35,7 @@ pub fn enemy_movement(
             if let Some(waypoints) = &level.waypoints {
                 if enemy.waypoint < waypoints.len() && enemy.health > 0.0 {
                     // add 0.5 character offset
-                    let direction = waypoints[enemy.waypoint] - position.translation();
+                    let direction = waypoints[enemy.waypoint] - position.translation() + Vec3::Y * 0.2;
                     let movement = direction.normalize() * enemy.speed * 4.0 * time.delta_seconds();
 
                     // coordinates of the next waypoint and height of the enemy to look straight
