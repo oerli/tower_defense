@@ -87,7 +87,7 @@ pub fn setup_level(
                             parent.spawn((SceneBundle {
                                 scene: asset_server.load(tile_type(x, z, false, &level.heights)),
                                 transform: Transform::from_xyz(0.0, -0.1, 0.0)
-                                    .with_rotation(tile_rotaton(x, z, &level.heights)),
+                                    .with_rotation(tile_rotation(x, z, &level.heights)),
                                 ..Default::default()
                             },));
                             // create some trees or rocks
@@ -208,10 +208,10 @@ pub fn setup_level(
                     || backward_direction.z == forward_direction.z
                 {
                     let rotation =
-                        if tile_rotaton(position.x as usize, position.z as usize, &level.heights)
+                        if tile_rotation(position.x as usize, position.z as usize, &level.heights)
                             != Quat::default()
                         {
-                            tile_rotaton(position.x as usize, position.z as usize, &level.heights)
+                            tile_rotation(position.x as usize, position.z as usize, &level.heights)
                         } else {
                             Quat::from_rotation_y(forward_rotation_angle)
                         };
@@ -253,23 +253,21 @@ pub fn setup_level(
                 } else {
                     // calculate the rotation of a corner tile from last, current and next tile
                     // todo: review if there would be any better option
+                    let rotation_angle = forward_rotation_angle - backward_rotation_angle;
+
                     let rotation = if forward_direction.x - backward_direction.x < 0.0
                         && forward_direction.z - backward_direction.z > 0.0
                     {
-                        let rotation_angle = forward_rotation_angle - backward_rotation_angle;
                         Quat::from_rotation_y(rotation_angle - PI / 2.0)
                     } else if forward_direction.x - backward_direction.x < 0.0
                         && forward_direction.z - backward_direction.z < 0.0
                     {
-                        let rotation_angle = forward_rotation_angle - backward_rotation_angle;
                         Quat::from_rotation_y(rotation_angle + PI)
                     } else if forward_direction.x - backward_direction.x > 0.0
                         && forward_direction.z - backward_direction.z > 0.0
                     {
-                        let rotation_angle = forward_rotation_angle - backward_rotation_angle;
                         Quat::from_rotation_y(rotation_angle)
                     } else {
-                        let rotation_angle = forward_rotation_angle - backward_rotation_angle;
                         Quat::from_rotation_y(rotation_angle + PI / 2.0)
                     };
 
@@ -468,7 +466,7 @@ fn tile_type(x: usize, z: usize, path: bool, heights: &Vec<Vec<f32>>) -> String 
 }
 
 // todo: optimize this
-fn tile_rotaton(x: usize, z: usize, heights: &Vec<Vec<f32>>) -> Quat {
+fn tile_rotation(x: usize, z: usize, heights: &Vec<Vec<f32>>) -> Quat {
     // check if the current element is a corner on the edge of the field
     if z == 0 && x == heights[z].len() - 1 {
         return Quat::from_rotation_y(0.0);
@@ -504,7 +502,7 @@ fn tile_rotaton(x: usize, z: usize, heights: &Vec<Vec<f32>>) -> Quat {
 
     // inner slopes
     if heights[z][x] < heights[z + 1][x] {
-        return Quat::from_rotation_y(0.0);
+        return Quat::from_rotation_y(0.001); // dirty slope fix for path
     }
 
     if heights[z][x] < heights[z - 1][x] {
