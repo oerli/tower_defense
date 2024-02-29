@@ -40,7 +40,7 @@ fn main() {
         .add_plugins(
             DefaultPickingPlugins
                 .build()
-                // .disable::<RaycastBackend>()
+                .disable::<RaycastBackend>()
                 // .disable::<DebugPickingPlugin>(),
         )
         .add_plugins(PlayerPlugin)

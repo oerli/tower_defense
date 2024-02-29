@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy_mod_picking::prelude::*;
 use bevy_panorbit_camera::PanOrbitCamera;
-use bevy_rapier3d::prelude::*;
 
 use crate::player::resources::*;
 use crate::GameState;
