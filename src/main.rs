@@ -64,7 +64,6 @@ fn main() {
         .add_state::<GameState>()
         // Systems
         .add_systems(Startup, setup_graphics)
-        .add_systems(Startup, setup_physics)
         .add_systems(Update, update_text)
         .add_systems(Update, change_game_state)
         .add_systems(Update, play_animations.run_if(in_state(GameState::Playing)))

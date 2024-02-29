@@ -23,6 +23,7 @@ pub fn setup_level(
     mut commands: Commands,
     query_tiles: Query<Entity, With<Tile>>,
     query_defense: Query<Entity, With<Defense>>,
+    query_terrain: Query<Entity, With<Terrain>>,
     asset_server: Res<AssetServer>,
     level: Res<LevelHandle>,
     mut levels: ResMut<Assets<Level>>,
@@ -39,34 +40,27 @@ pub fn setup_level(
         for defense_entity in query_defense.iter() {
             commands.entity(defense_entity).despawn_recursive();
         }
-        let heights = vec![
-            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-         ];
-        // for (x, z_line) in heights.iter().enumerate() {
-        //     for (z , height) in z_line.iter().enumerate() {
-        //         info!("{:?}", tile_type(&heights, x, z));
+        // remove terrain heightfield
+        for terrain_entity in query_terrain.iter() {
+            commands.entity(terrain_entity).despawn_recursive();
+        }
 
-        //     }
-        // }
+        // create the ground
+        commands.spawn((
+            Collider::heightfield(
+                level.heights.clone().into_iter().flat_map(|x| x).collect(),
+                16,
+                16,
+                Vec3::new(16.0, 0.2, 16.0),
+            ),
+            CollisionGroups::new(Group::GROUP_4, Group::all()),
+            TransformBundle::from(Transform::from_xyz(7.5, 0.0, 7.5)),
+            Terrain,
+        ));
 
         // create tiles
         let mut waypoints = Vec::new();
-        for (x, z_line) in level.map.iter().enumerate() {
+        for (x, z_line) in level.path.iter().enumerate() {
             for (z, path_index) in z_line.iter().enumerate() {
                 // select specific tile from sorrounding heights from the heights map
 
@@ -76,7 +70,7 @@ pub fn setup_level(
                         .spawn((
                             TransformBundle::from_transform(Transform::from_xyz(
                                 x as f32,
-                                heights[x][z] * 0.2 - 0.1,
+                                level.heights[x][z] * 0.2 - 0.1,
                                 z as f32,
                             )),
                             VisibilityBundle::default(),
@@ -91,8 +85,9 @@ pub fn setup_level(
                         ))
                         .with_children(|parent| {
                             parent.spawn((SceneBundle {
-                                scene: asset_server.load(tile_type(x, z, false)),
-                                transform: Transform::from_xyz(0.0, -0.1, 0.0).with_rotation(tile_rotaton(x, z)),
+                                scene: asset_server.load(tile_type(x, z, false, &level.heights)),
+                                transform: Transform::from_xyz(0.0, -0.1, 0.0)
+                                    .with_rotation(tile_rotaton(x, z, &level.heights)),
                                 ..Default::default()
                             },));
                             // create some trees or rocks
@@ -115,7 +110,7 @@ pub fn setup_level(
                     // collect all waypoints
                     waypoints.push((
                         path_index,
-                        Vec3::new(x as f32, heights[x][z] * 0.2 + 0.5, z as f32),
+                        Vec3::new(x as f32, level.heights[x][z] * 0.2 + 0.5, z as f32),
                     ));
                 }
             }
@@ -139,7 +134,7 @@ pub fn setup_level(
                         TransformBundle::from_transform(
                             Transform::from_xyz(
                                 position.x,
-                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                level.heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
                                 position.z,
                             )
                             .with_rotation(rotation),
@@ -172,7 +167,7 @@ pub fn setup_level(
                         TransformBundle::from_transform(
                             Transform::from_xyz(
                                 position.x,
-                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                level.heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
                                 position.z,
                             )
                             .with_rotation(rotation),
@@ -212,41 +207,49 @@ pub fn setup_level(
                 if backward_direction.x == forward_direction.x
                     || backward_direction.z == forward_direction.z
                 {
-                    let rotation = if tile_rotaton(position.x as usize, position.z as usize) != Quat::default() {
-                        tile_rotaton(position.x as usize, position.z as usize)
-                    } else {
-                        Quat::from_rotation_y(forward_rotation_angle)
-                    };
+                    let rotation =
+                        if tile_rotaton(position.x as usize, position.z as usize, &level.heights)
+                            != Quat::default()
+                        {
+                            tile_rotaton(position.x as usize, position.z as usize, &level.heights)
+                        } else {
+                            Quat::from_rotation_y(forward_rotation_angle)
+                        };
                     // let rotation = Quat::from_rotation_y(forward_rotation_angle);
-                    commands.spawn((
-                        TransformBundle::from_transform(
-                            Transform::from_xyz(
-                                position.x,
-                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
-                                position.z,
-                            ).with_rotation(rotation),
-                        ),
-                        VisibilityBundle::default(),
-                        Tile,
-                    )).with_children(|parent| {
-                        parent.spawn(SceneBundle {
-                            scene: asset_server.load(tile_type(
-                                position.x as usize,
-                                position.z as usize,
-                                true,
-                            )),
-                            transform: Transform::from_xyz(0.0, -0.1, 0.0),
-                            ..Default::default()
-                        });
-                        // create some dirt on street
-                        if 0.3 > rng.gen() {
+                    commands
+                        .spawn((
+                            TransformBundle::from_transform(
+                                Transform::from_xyz(
+                                    position.x,
+                                    level.heights[position.x as usize][position.z as usize] * 0.2
+                                        - 0.1,
+                                    position.z,
+                                )
+                                .with_rotation(rotation),
+                            ),
+                            VisibilityBundle::default(),
+                            Tile,
+                        ))
+                        .with_children(|parent| {
                             parent.spawn(SceneBundle {
-                                scene: asset_server.load("models/dirt.glb#Scene0"),
-                                transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                                scene: asset_server.load(tile_type(
+                                    position.x as usize,
+                                    position.z as usize,
+                                    true,
+                                    &level.heights,
+                                )),
+                                transform: Transform::from_xyz(0.0, -0.1, 0.0),
                                 ..Default::default()
                             });
-                        }
-                    });
+                            // create some dirt on street
+                            if 0.3 > rng.gen() {
+                                parent.spawn(SceneBundle {
+                                    scene: asset_server.load("models/dirt.glb#Scene0"),
+                                    transform: Transform::from_xyz(0.0, 0.1, 0.0),
+                                    ..Default::default()
+                                });
+                            }
+                        });
                 } else {
                     // calculate the rotation of a corner tile from last, current and next tile
                     // todo: review if there would be any better option
@@ -272,11 +275,15 @@ pub fn setup_level(
 
                     commands
                         .spawn((
-                            TransformBundle::from_transform(Transform::from_xyz(
-                                position.x,
-                                heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
-                                position.z,
-                            ).with_rotation(rotation)),
+                            TransformBundle::from_transform(
+                                Transform::from_xyz(
+                                    position.x,
+                                    level.heights[position.x as usize][position.z as usize] * 0.2
+                                        - 0.1,
+                                    position.z,
+                                )
+                                .with_rotation(rotation),
+                            ),
                             VisibilityBundle::default(),
                             Tile,
                         ))
@@ -417,26 +424,8 @@ pub fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     ]));
 }
 
-fn tile_type(x: usize, z: usize, path: bool) -> String {
-    let heights = vec![
-            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-         ];
-        // check if the current element is on a corner
+fn tile_type(x: usize, z: usize, path: bool, heights: &Vec<Vec<f32>>) -> String {
+    // check if the current element is on a corner
     if (z == 0 || z == heights.len() - 1) && (x == 0 || x == heights[z].len() - 1) {
         return "models/outer_corner.glb#Scene0".to_string();
 
@@ -449,12 +438,11 @@ fn tile_type(x: usize, z: usize, path: bool) -> String {
         // return TileType::Edge;
     }
 
-
     // slopes on the z axis
-    if  heights[z][x] < heights[z + 1][x] || heights[z][x] < heights[z - 1][x] ||
+    if heights[z][x] < heights[z + 1][x] || heights[z][x] < heights[z - 1][x] ||
         // slopes on the x axis
         heights[z][x] < heights[z][x + 1] || heights[z][x] < heights[z][x - 1]
-        {
+    {
         // return TileType::Edge;
         if path {
             return "models/tile_slope.glb#Scene0".to_string();
@@ -464,7 +452,10 @@ fn tile_type(x: usize, z: usize, path: bool) -> String {
     }
 
     // corner in field
-    if (heights[z][x] < heights[z+1][x+1]) || (heights[z][x] < heights[z-1][x+1]) || (heights[z][x] < heights[z+1][x-1] || heights[z][x] < heights[z-1][x-1]) {
+    if (heights[z][x] < heights[z + 1][x + 1])
+        || (heights[z][x] < heights[z - 1][x + 1])
+        || (heights[z][x] < heights[z + 1][x - 1] || heights[z][x] < heights[z - 1][x - 1])
+    {
         return "models/outer_corner.glb#Scene0".to_string();
     }
 
@@ -477,34 +468,16 @@ fn tile_type(x: usize, z: usize, path: bool) -> String {
 }
 
 // todo: optimize this
-fn tile_rotaton(x: usize, z: usize) -> Quat {
-    let heights = vec![
-            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  3.0,  3.0,  3.0,  3.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  1.0,  0.0],
-            [0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
-         ];
+fn tile_rotaton(x: usize, z: usize, heights: &Vec<Vec<f32>>) -> Quat {
     // check if the current element is a corner on the edge of the field
-    if z == 0  && x == heights[z].len() - 1 {
+    if z == 0 && x == heights[z].len() - 1 {
         return Quat::from_rotation_y(0.0);
     }
 
-    if x == 0  && z == 0  {
-        return Quat::from_rotation_y( PI / 2.0);
+    if x == 0 && z == 0 {
+        return Quat::from_rotation_y(PI / 2.0);
     }
-    if z == heights.len() - 1 && x == 0  {
+    if z == heights.len() - 1 && x == 0 {
         return Quat::from_rotation_y(PI);
     }
 
@@ -512,10 +485,9 @@ fn tile_rotaton(x: usize, z: usize) -> Quat {
         return Quat::from_rotation_y(-PI / 2.0);
     }
 
-
     // outer side
-    if x == 0  {
-        return Quat::from_rotation_y(PI /2.0);
+    if x == 0 {
+        return Quat::from_rotation_y(PI / 2.0);
     }
 
     if z == 0 {
@@ -523,42 +495,41 @@ fn tile_rotaton(x: usize, z: usize) -> Quat {
     }
 
     if x == heights[z].len() - 1 {
-        return Quat::from_rotation_y( -PI / 2.0);
+        return Quat::from_rotation_y(-PI / 2.0);
     }
 
-    if z == heights.len() - 1  {
+    if z == heights.len() - 1 {
         return Quat::from_rotation_y(PI);
     }
 
     // inner slopes
-    if heights[z][x] < heights[z+1][x] {
+    if heights[z][x] < heights[z + 1][x] {
         return Quat::from_rotation_y(0.0);
     }
 
-    if heights[z][x] < heights[z-1][x] {
-        
+    if heights[z][x] < heights[z - 1][x] {
         return Quat::from_rotation_y(PI);
     }
 
     if heights[z][x] < heights[z][x + 1] {
-        return Quat::from_rotation_y(PI/2.0);
+        return Quat::from_rotation_y(PI / 2.0);
     }
 
     if heights[z][x] < heights[z][x - 1] {
-        return Quat::from_rotation_y(-PI/2.0);
+        return Quat::from_rotation_y(-PI / 2.0);
     }
 
     // corners in field
-    if heights[z][x] < heights[z+1][x+1] {
-        return Quat::from_rotation_y( PI / 2.0);
+    if heights[z][x] < heights[z + 1][x + 1] {
+        return Quat::from_rotation_y(PI / 2.0);
     }
-    if heights[z][x] < heights[z-1][x+1] {
+    if heights[z][x] < heights[z - 1][x + 1] {
         return Quat::from_rotation_y(PI);
     }
-    if heights[z][x] < heights[z+1][x-1] {
+    if heights[z][x] < heights[z + 1][x - 1] {
         return Quat::from_rotation_y(0.0);
     }
-    if heights[z][x] < heights[z-1][x-1] {
+    if heights[z][x] < heights[z - 1][x - 1] {
         return Quat::from_rotation_y(-PI / 2.0);
     }
 

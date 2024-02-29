@@ -10,7 +10,8 @@ pub struct Level {
     pub waypoints: Option<Vec<Vec3>>,
     pub rounds: usize,
     pub last_level: bool,
-    pub map: Vec<Vec<u8>>,
+    pub path: Vec<Vec<u8>>,
+    pub heights: Vec<Vec<f32>>,
 }
 
 #[derive(Component, Deserialize, Asset, TypePath, Clone, Debug)]
@@ -19,3 +20,6 @@ pub struct Round {
     pub enemy_count: i32,
     pub separation_time: f32,
 }
+
+#[derive(Component)]
+pub struct Terrain;
