@@ -19,6 +19,7 @@ pub fn enemy_movement(
         &mut Enemy,
         &GlobalTransform,
         &mut Transform,
+        &mut Velocity,
         // &mut KinematicCharacterController,
     )>,
     current_level: Res<CurrentLevel>,
@@ -31,12 +32,12 @@ pub fn enemy_movement(
     time: Res<Time>,
 ) {
     if let Some(level) = &current_level.level {
-        for (entity, mut enemy, position, mut transform) in query.iter_mut() {
+        for (entity, mut enemy, position, mut transform, mut velocity) in query.iter_mut() {
             if let Some(waypoints) = &level.waypoints {
                 if enemy.waypoint < waypoints.len() && enemy.health > 0.0 {
                     // add 0.5 character offset
                     let direction = waypoints[enemy.waypoint] - position.translation();
-                    let movement = direction.normalize() * enemy.speed * 4.0 * time.delta_seconds();
+                    let movement = direction.normalize() * enemy.speed * time.delta_seconds();
 
                     // coordinates of the next waypoint and height of the enemy to look straight
                     transform.look_to(direction.normalize(), Vec3::Y);
@@ -45,8 +46,7 @@ pub fn enemy_movement(
                     if direction.length() < 0.1 {
                         enemy.waypoint += 1;
                     } else {
-                        transform.translation += movement;
-                        // controller.translation = Some(movement);
+                        velocity.linvel = movement;
                     }
                     
                     

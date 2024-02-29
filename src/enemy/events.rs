@@ -20,26 +20,10 @@ pub fn spawn_enemy(
         commands
             .spawn((
                 RigidBody::Dynamic,
-                // RigidBody::KinematicPositionBased,
-                // Collider::cuboid(0.5, 0.5, 0.5),
-                // Velocity {
-                //     linvel: Vec3::new(0.0, 0.0, 0.0),
-                //     angvel: Vec3::new(0.0, 0.0, 0.0),
-                // },
                 Collider::cuboid(0.25, 0.5, 0.25),
                 TransformBundle::from(Transform::from_translation(event.position)),
                 VisibilityBundle::default(),
-                // KinematicCharacterController {
-                //     up: Vec3::Y,
-                //     max_slope_climb_angle: f32::to_radians(60.0),
-                //     min_slope_slide_angle: f32::to_radians(30.0),
-                //     snap_to_ground: Some(CharacterLength::Absolute(0.01)),
-                //     offset: CharacterLength::Absolute(0.01),
-                //     // translation: Some(event.position + Vec3::new(0.0, 0.5, 0.0)),
-                //     // slide: false,
-                //     filter_flags: QueryFilterFlags::EXCLUDE_SENSORS,
-                //     ..default()
-                // },
+                Velocity::default(),
                 ActiveEvents::COLLISION_EVENTS,
                 CollisionGroups::new(
                     Group::GROUP_3,
