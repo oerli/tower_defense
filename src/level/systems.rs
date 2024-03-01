@@ -70,7 +70,7 @@ pub fn setup_level(
                         .spawn((
                             TransformBundle::from_transform(Transform::from_xyz(
                                 x as f32,
-                                level.heights[x][z] * 0.2 - 0.1,
+                                level.heights[x][z] * 0.2,
                                 z as f32,
                             )),
                             VisibilityBundle::default(),
@@ -134,7 +134,7 @@ pub fn setup_level(
                         TransformBundle::from_transform(
                             Transform::from_xyz(
                                 position.x,
-                                level.heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                level.heights[position.x as usize][position.z as usize] * 0.2,
                                 position.z,
                             )
                             .with_rotation(rotation),
@@ -167,7 +167,7 @@ pub fn setup_level(
                         TransformBundle::from_transform(
                             Transform::from_xyz(
                                 position.x,
-                                level.heights[position.x as usize][position.z as usize] * 0.2 - 0.1,
+                                level.heights[position.x as usize][position.z as usize] * 0.2,
                                 position.z,
                             )
                             .with_rotation(rotation),
@@ -221,8 +221,7 @@ pub fn setup_level(
                             TransformBundle::from_transform(
                                 Transform::from_xyz(
                                     position.x,
-                                    level.heights[position.x as usize][position.z as usize] * 0.2
-                                        - 0.1,
+                                    level.heights[position.x as usize][position.z as usize] * 0.2,
                                     position.z,
                                 )
                                 .with_rotation(rotation),
@@ -276,8 +275,7 @@ pub fn setup_level(
                             TransformBundle::from_transform(
                                 Transform::from_xyz(
                                     position.x,
-                                    level.heights[position.x as usize][position.z as usize] * 0.2
-                                        - 0.1,
+                                    level.heights[position.x as usize][position.z as usize] * 0.2,
                                     position.z,
                                 )
                                 .with_rotation(rotation),
